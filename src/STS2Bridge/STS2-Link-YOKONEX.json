@@ -1,6 +1,6 @@
 {
-  "id": "STS2Bridge",
-  "name": "STS2Bridge",
+  "id": "STS2-Link-YOKONEX",
+  "name": "STS2-Link-YOKONEX",
   "author": "hosgoo + Codex",
   "description": "Local bridge mod for Slay the Spire 2 exposing state, events, and local action APIs.",
   "version": "0.1.0",

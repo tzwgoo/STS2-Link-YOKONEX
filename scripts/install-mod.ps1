@@ -1,6 +1,6 @@
 param(
     [string]$GameRoot = "D:\Users\hosgoo\Downloads\Slay the Spire 2\Slay the Spire 2",
-    [string]$ModName = "STS2Bridge"
+    [string]$ModName = "STS2-Link-YOKONEX"
 )
 
 $ErrorActionPreference = "Stop"

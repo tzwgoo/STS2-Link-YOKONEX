@@ -33,7 +33,7 @@ public static class ModEntry
 
     public static void Initialize()
     {
-        ModLog.Info("STS2Bridge initializing...");
+        ModLog.Info("STS2-Link-YOKONEX initializing...");
 
         try
         {
@@ -47,7 +47,7 @@ public static class ModEntry
 
             var harmonyResult = HookGuard.Run("patch-all", () =>
             {
-                var harmony = new Harmony("com.sts2.bridge");
+                var harmony = new Harmony("com.hosgoo.sts2-link-yokonex");
                 harmony.PatchAll();
             });
 
@@ -64,11 +64,11 @@ public static class ModEntry
             ModLog.Info($"Hook install result: success={harmonyResult.Success}, message={harmonyResult.Message}");
             ModLog.Info($"CombatManager bridge result: success={combatManagerHookResult.Success}, message={combatManagerHookResult.Message}");
             ModLog.Info($"Detected game version: {GameVersionDetector.Detect()}");
-            ModLog.Info("STS2Bridge initialized.");
+            ModLog.Info("STS2-Link-YOKONEX initialized.");
         }
         catch (Exception ex)
         {
-            ModLog.Error("STS2Bridge initialization failed.", ex);
+            ModLog.Error("STS2-Link-YOKONEX initialization failed.", ex);
         }
     }
 

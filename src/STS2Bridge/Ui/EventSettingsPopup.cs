@@ -5,7 +5,7 @@ namespace STS2Bridge.Ui;
 
 public sealed class EventSettingsPopup : PanelContainer
 {
-    public const string PopupNodeName = "STS2BridgeEventSettingsPopup";
+    public const string PopupNodeName = "STS2LinkYOKONEXEventSettingsPopup";
 
     private readonly EventToggleService _eventToggles;
     private readonly Action _saveSettings;
@@ -62,7 +62,7 @@ public sealed class EventSettingsPopup : PanelContainer
         var title = new Label
         {
             Name = "Title",
-            Text = "STS2Bridge Events"
+            Text = "STS2-Link-YOKONEX Events"
         };
         stack.AddChild(title);
 

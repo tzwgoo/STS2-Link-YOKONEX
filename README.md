@@ -54,14 +54,14 @@
 
 ### 事件设置页
 
-项目会在游戏 `Settings` 页面里注入 `STS2Bridge Events` 入口。
+项目会在游戏 `Settings` 页面里注入 `STS2-Link-YOKONEX Events` 入口。
 
 你可以在面板里逐项开启或关闭事件，修改后立即生效，并持久化到本地配置文件。
 
 默认配置文件路径：
 
 ```text
-C:\Users\<你的用户名>\AppData\Roaming\SlayTheSpire2\mods\STS2Bridge\bridge-settings.json
+C:\Users\<你的用户名>\AppData\Roaming\SlayTheSpire2\mods\STS2-Link-YOKONEX\bridge-settings.json
 ```
 
 ### 快捷键
@@ -102,19 +102,19 @@ D:\Users\hosgoo\Downloads\Slay the Spire 2\Slay the Spire 2\data_sts2_windows_x8
 ### 构建
 
 ```powershell
-dotnet build D:\STS2-Link-YOKONEX\src\STS2Bridge\STS2Bridge.csproj -c Release
+dotnet build D:\STS2-Link-YOKONEX\src\STS2Bridge\STS2-Link-YOKONEX.csproj -c Release
 ```
 
 构建后会整理出最小 Mod 包目录：
 
 ```text
-D:\STS2-Link-YOKONEX\artifacts\mods\STS2Bridge
+D:\STS2-Link-YOKONEX\artifacts\mods\STS2-Link-YOKONEX
 ```
 
 ### 测试
 
 ```powershell
-dotnet test D:\STS2-Link-YOKONEX\tests\STS2Bridge.Tests\STS2Bridge.Tests.csproj
+dotnet test D:\STS2-Link-YOKONEX\tests\STS2Bridge.Tests\STS2-Link-YOKONEX.Tests.csproj
 ```
 
 ## 安装到游戏
@@ -128,14 +128,14 @@ powershell -ExecutionPolicy Bypass -File D:\STS2-Link-YOKONEX\scripts\install-mo
 当前脚本会把最新产物安装到：
 
 ```text
-D:\Users\hosgoo\Downloads\Slay the Spire 2\Slay the Spire 2\mods\STS2Bridge
+D:\Users\hosgoo\Downloads\Slay the Spire 2\Slay the Spire 2\mods\STS2-Link-YOKONEX
 ```
 
 预期结构类似：
 
 ```text
-<游戏目录>\mods\STS2Bridge\STS2Bridge.dll
-<游戏目录>\mods\STS2Bridge\STS2Bridge.json
+<游戏目录>\mods\STS2-Link-YOKONEX\STS2-Link-YOKONEX.dll
+<游戏目录>\mods\STS2-Link-YOKONEX\STS2-Link-YOKONEX.json
 ```
 
 ## 如何验证
@@ -151,12 +151,12 @@ D:\Users\hosgoo\Downloads\Slay the Spire 2\Slay the Spire 2\mods\STS2Bridge
 - `Found mod manifest file`
 - `Loading assembly DLL`
 - `Calling initializer method of type STS2Bridge.ModEntry`
-- `Finished mod initialization for 'STS2Bridge'`
+- `Finished mod initialization for 'STS2-Link-YOKONEX'`
 
 ### 2. 验证设置页与快捷键
 
 - 打开游戏 `Settings`
-- 找到 `STS2Bridge Events`
+- 找到 `STS2-Link-YOKONEX Events`
 - 点击后确认面板能打开
 - 在主菜单或游戏内按 `F8`
 - 确认面板能打开或关闭

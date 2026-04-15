@@ -5,7 +5,7 @@ namespace STS2Bridge.Ui;
 
 public static class SettingsScreenBridge
 {
-    private const string ButtonNodeName = "STS2BridgeEventsButton";
+    private const string ButtonNodeName = "STS2LinkYOKONEXEventsButton";
 
     public static void Install(object? settingsScreenInstance)
     {
@@ -22,7 +22,7 @@ public static class SettingsScreenBridge
         var button = new Button
         {
             Name = ButtonNodeName,
-            Text = "STS2Bridge Events",
+            Text = "STS2-Link-YOKONEX Events",
             TooltipText = "Open bridge event toggles"
         };
         button.AnchorLeft = 1;
@@ -39,6 +39,6 @@ public static class SettingsScreenBridge
         button.Pressed += EventSettingsUiController.TogglePopup;
         settingsScreen.AddChild(button);
 
-        ModLog.Info("Installed STS2Bridge settings button.");
+        ModLog.Info("Installed STS2-Link-YOKONEX settings button.");
     }
 }

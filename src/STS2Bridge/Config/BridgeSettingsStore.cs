@@ -38,7 +38,7 @@ public sealed class BridgeSettingsStore(string filePath)
     public static string GetDefaultPath()
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appData, "SlayTheSpire2", "mods", "STS2Bridge", "bridge-settings.json");
+        return Path.Combine(appData, "SlayTheSpire2", "mods", "STS2-Link-YOKONEX", "bridge-settings.json");
     }
 
     private static BridgeSettings MergeWithDefaults(BridgeSettings? settings)

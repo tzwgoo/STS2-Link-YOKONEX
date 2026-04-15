@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <RootNamespace>STS2Bridge</RootNamespace>
-    <AssemblyName>STS2Bridge</AssemblyName>
+    <RootNamespace>STS2LinkYOKONEX</RootNamespace>
+    <AssemblyName>STS2-Link-YOKONEX</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup Condition="Exists('$(STS2GameDir)\\sts2.dll')">
@@ -21,24 +21,24 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="STS2Bridge.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="STS2-Link-YOKONEX.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>STS2Bridge.Tests</_Parameter1>
+      <_Parameter1>STS2-Link-YOKONEX.Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
 
   <Target Name="AssembleModPackage" AfterTargets="Build">
     <PropertyGroup>
-      <ModPackageDir>$(MSBuildProjectDirectory)\..\..\artifacts\mods\STS2Bridge</ModPackageDir>
+      <ModPackageDir>$(MSBuildProjectDirectory)\..\..\artifacts\mods\STS2-Link-YOKONEX</ModPackageDir>
     </PropertyGroup>
 
     <RemoveDir Directories="$(ModPackageDir)" Condition="Exists('$(ModPackageDir)')" />
     <MakeDir Directories="$(ModPackageDir)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModPackageDir)" />
-    <Copy SourceFiles="$(MSBuildProjectDirectory)\STS2Bridge.json" DestinationFolder="$(ModPackageDir)" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\STS2-Link-YOKONEX.json" DestinationFolder="$(ModPackageDir)" />
   </Target>
 
 </Project>

@@ -3,6 +3,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <RootNamespace>STS2LinkYOKONEX.Tests</RootNamespace>
+    <AssemblyName>STS2-Link-YOKONEX.Tests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\STS2Bridge\STS2Bridge.csproj" />
+    <ProjectReference Include="..\..\src\STS2Bridge\STS2-Link-YOKONEX.csproj" />
   </ItemGroup>
 
   <ItemGroup>
