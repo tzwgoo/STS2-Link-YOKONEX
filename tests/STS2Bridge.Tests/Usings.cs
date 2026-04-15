@@ -1,0 +1,12 @@
+global using System.Net;
+global using System.Net.Http.Json;
+global using System.Text.Json;
+global using STS2Bridge.Actions;
+global using STS2Bridge.Api;
+global using STS2Bridge.Api.Http;
+global using STS2Bridge.Config;
+global using STS2Bridge.Events;
+global using STS2Bridge.State;
+global using STS2Bridge.State.Dtos;
+global using STS2Bridge.Threading;
+global using Xunit;

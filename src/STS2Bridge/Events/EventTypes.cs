@@ -1,0 +1,25 @@
+namespace STS2Bridge.Events;
+
+public static class EventTypes
+{
+    public const string RoomEntered = "room.entered";
+    public const string CombatStarted = "combat.started";
+    public const string CombatEnded = "combat.ended";
+    public const string TurnStarted = "turn.started";
+    public const string CardPlayed = "card.played";
+    public const string PlayerHpChanged = "player.hp_changed";
+    public const string PlayerDamaged = "player.damaged";
+    public const string PlayerHealed = "player.healed";
+    public const string PlayerEnergyChanged = "player.energy_changed";
+    public const string PlayerBlockChanged = "player.block_changed";
+    public const string PlayerBlockBroken = "player.block_broken";
+    public const string PlayerBlockCleared = "player.block_cleared";
+    public const string PlayerDied = "player.died";
+    public const string EnemyHpChanged = "enemy.hp_changed";
+    public const string EnemyDamaged = "enemy.damaged";
+    public const string CardUpgraded = "card.upgraded";
+    public const string ItemPurchased = "item.purchased";
+    public const string RewardOpened = "reward.opened";
+    public const string RewardSelected = "reward.selected";
+    public const string EventOptionSelected = "event.option_selected";
+}

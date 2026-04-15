@@ -1,0 +1,41 @@
+# Build outputs
+bin/
+obj/
+artifacts/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+*.iml
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Logs and temp files
+*.log
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local environment overrides
+appsettings.Local.json
+
+# Generated settings copied from runtime
+bridge-settings.json
+
+# Tool and package caches
+packages/
+*.nupkg

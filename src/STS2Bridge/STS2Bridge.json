@@ -1,0 +1,11 @@
+{
+  "id": "STS2Bridge",
+  "name": "STS2Bridge",
+  "author": "hosgoo + Codex",
+  "description": "Local bridge mod for Slay the Spire 2 exposing state, events, and local action APIs.",
+  "version": "0.1.0",
+  "has_pck": false,
+  "has_dll": true,
+  "dependencies": [],
+  "affects_gameplay": true
+}

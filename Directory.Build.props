@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <STS2GameDir>D:\Users\hosgoo\Downloads\Slay the Spire 2\Slay the Spire 2\data_sts2_windows_x86_64</STS2GameDir>
+  </PropertyGroup>
+</Project>
