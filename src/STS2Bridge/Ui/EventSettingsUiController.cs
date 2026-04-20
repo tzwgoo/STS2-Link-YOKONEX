@@ -8,12 +8,20 @@ public static class EventSettingsUiController
 
     public static void EnsurePopup(Node host)
     {
+        RemoveDuplicatePopups(host);
+
         if (TryGetPopup(out _))
         {
             return;
         }
 
-        var popup = new EventSettingsPopup(ModEntry.EventToggles, ModEntry.SaveSettings);
+        var popup = new EventSettingsPopup(
+            ModEntry.EventToggles,
+            () => ModEntry.ImStatus,
+            ModEntry.UpdateSettings,
+            () => ModEntry.LoginImAsync(),
+            () => ModEntry.LogoutImAsync(),
+            ModEntry.SaveSettings);
         host.AddChild(popup);
         _popupRef = new WeakReference<EventSettingsPopup>(popup);
     }
@@ -52,6 +60,56 @@ public static class EventSettingsUiController
 
         popup = existing;
         return true;
+    }
+
+    private static void RemoveDuplicatePopups(Node host)
+    {
+        var sceneRoot = host.GetTree()?.CurrentScene ?? host.GetTree()?.Root;
+        if (sceneRoot is null)
+        {
+            return;
+        }
+
+        var popups = FindPopups(sceneRoot).ToList();
+        if (popups.Count == 0)
+        {
+            return;
+        }
+
+        EventSettingsPopup? keep = null;
+        if (_popupRef is not null && _popupRef.TryGetTarget(out var existing) && GodotObject.IsInstanceValid(existing))
+        {
+            keep = existing;
+        }
+        else
+        {
+            keep = popups[0];
+            _popupRef = new WeakReference<EventSettingsPopup>(keep);
+        }
+
+        foreach (var popup in popups)
+        {
+            if (!ReferenceEquals(popup, keep))
+            {
+                popup.QueueFree();
+            }
+        }
+    }
+
+    private static IEnumerable<EventSettingsPopup> FindPopups(Node root)
+    {
+        foreach (Node child in root.GetChildren())
+        {
+            if (child is EventSettingsPopup popup)
+            {
+                yield return popup;
+            }
+
+            foreach (var nested in FindPopups(child))
+            {
+                yield return nested;
+            }
+        }
     }
 
     private static Node? ResolveHost()

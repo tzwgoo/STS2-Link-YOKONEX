@@ -13,13 +13,26 @@ public sealed class EventCatalogTests
         Assert.Contains(EventTypes.CombatStarted, ids);
         Assert.Contains(EventTypes.TurnStarted, ids);
         Assert.Contains(EventTypes.CombatEnded, ids);
-        Assert.Contains(EventTypes.CardPlayed, ids);
         Assert.Contains(EventTypes.PlayerHpChanged, ids);
         Assert.Contains(EventTypes.PlayerDamaged, ids);
         Assert.Contains(EventTypes.PlayerHealed, ids);
+        Assert.Contains(EventTypes.PlayerEnergyChanged, ids);
         Assert.Contains(EventTypes.PlayerBlockChanged, ids);
         Assert.Contains(EventTypes.PlayerBlockBroken, ids);
         Assert.Contains(EventTypes.PlayerBlockCleared, ids);
         Assert.Contains(EventTypes.PlayerDied, ids);
+    }
+
+    [Fact]
+    public void Default_command_map_should_include_documented_im_bridge_events()
+    {
+        Assert.Equal("combat_start", EventCommandCatalog.DefaultMap[EventTypes.CombatStarted]);
+        Assert.Equal("combat_end", EventCommandCatalog.DefaultMap[EventTypes.CombatEnded]);
+        Assert.Equal("turn_start", EventCommandCatalog.DefaultMap[EventTypes.TurnStarted]);
+        Assert.Equal("player_hurt", EventCommandCatalog.DefaultMap[EventTypes.PlayerDamaged]);
+        Assert.Equal("player_energy_changed", EventCommandCatalog.DefaultMap[EventTypes.PlayerEnergyChanged]);
+        Assert.Equal("player_dead", EventCommandCatalog.DefaultMap[EventTypes.PlayerDied]);
+        Assert.Equal("reward_selected", EventCommandCatalog.DefaultMap[EventTypes.RewardSelected]);
+        Assert.Equal("room_entered", EventCommandCatalog.DefaultMap[EventTypes.RoomEntered]);
     }
 }

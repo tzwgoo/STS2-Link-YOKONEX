@@ -1,5 +1,5 @@
 param(
-    [string]$GameRoot = "D:\Users\hosgoo\Downloads\Slay the Spire 2\Slay the Spire 2",
+    [string]$GameRoot = "D:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2",
     [string]$ModName = "STS2-Link-YOKONEX"
 )
 

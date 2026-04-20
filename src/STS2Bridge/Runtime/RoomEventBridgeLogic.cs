@@ -8,10 +8,16 @@ internal static class RoomEventBridgeLogic
 {
     private static readonly string[] RoomTypeMemberNames = ["RoomType", "roomType"];
     private static readonly string[] ModelIdMemberNames = ["ModelId", "modelId"];
+    private static readonly string[] TotalFloorMemberNames = ["TotalFloor", "totalFloor", "ActFloor", "actFloor"];
 
     public static bool PublishRoomEntered(GameEventBus eventBus, GameStateStore stateStore, object? room)
     {
-        if (!TryCreateRoomSnapshot(room, out var snapshot))
+        return PublishRoomEntered(eventBus, stateStore, runState: null, room);
+    }
+
+    public static bool PublishRoomEntered(GameEventBus eventBus, GameStateStore stateStore, object? runState, object? room)
+    {
+        if (!TryCreateRoomSnapshot(runState, room, out var snapshot))
         {
             return false;
         }
@@ -19,10 +25,12 @@ internal static class RoomEventBridgeLogic
         var state = stateStore.GetSnapshot();
         stateStore.Update(state with
         {
-            RoomType = snapshot.RoomType
+            RoomType = snapshot.RoomType,
+            Floor = snapshot.Floor ?? state.Floor
         });
 
         var updated = stateStore.GetSnapshot();
+        ModLog.Info($"AfterRoomEntered published. roomType={updated.RoomType} floor={updated.Floor} runStateType={runState?.GetType().FullName ?? "<null>"} roomTypeArg={room?.GetType().FullName ?? "<null>"}");
         eventBus.Publish(new GameEvent(
             EventId: $"evt-{Guid.NewGuid():N}",
             Type: EventTypes.RoomEntered,
@@ -33,6 +41,7 @@ internal static class RoomEventBridgeLogic
             {
                 roomType = snapshot.RoomType,
                 modelId = snapshot.ModelId,
+                floor = updated.Floor,
                 source = "hook.after_room_entered"
             }));
 
@@ -59,6 +68,11 @@ internal static class RoomEventBridgeLogic
 
     private static bool TryCreateRoomSnapshot(object? room, out RoomSnapshot snapshot)
     {
+        return TryCreateRoomSnapshot(runState: null, room, out snapshot);
+    }
+
+    private static bool TryCreateRoomSnapshot(object? runState, object? room, out RoomSnapshot snapshot)
+    {
         snapshot = default;
         if (room is null)
         {
@@ -72,10 +86,18 @@ internal static class RoomEventBridgeLogic
         }
 
         RuntimeReflectionHelpers.TryGetString(room, ModelIdMemberNames, out var modelId);
+        int? floor = TryGetFloor(runState, out var totalFloor) ? totalFloor : null;
         snapshot = new RoomSnapshot(
             NormalizeRoomType(roomType),
-            string.IsNullOrWhiteSpace(modelId) ? null : modelId);
+            string.IsNullOrWhiteSpace(modelId) ? null : modelId,
+            floor);
         return true;
+    }
+
+    private static bool TryGetFloor(object? runState, out int floor)
+    {
+        floor = default;
+        return runState is not null && RuntimeReflectionHelpers.TryGetInt(runState, TotalFloorMemberNames, out floor);
     }
 
     private static bool TryGetRoomType(object room, out string roomType)
@@ -104,5 +126,5 @@ internal static class RoomEventBridgeLogic
         return roomType.Replace("_", string.Empty, StringComparison.Ordinal).ToLowerInvariant();
     }
 
-    private readonly record struct RoomSnapshot(string RoomType, string? ModelId);
+    private readonly record struct RoomSnapshot(string RoomType, string? ModelId, int? Floor);
 }

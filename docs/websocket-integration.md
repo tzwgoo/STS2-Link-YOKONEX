@@ -1,68 +1,33 @@
 # WebSocket 对接文档
 
-本文档说明如何接入 `STS2-Link-YOKONEX` 的 WebSocket 事件流。
+本文档说明项目当前的两类 WebSocket 能力：
 
-当前实现对应代码：
+1. 本地桥接服务的事件流 WebSocket
+2. 外部 IM 服务的 `sendCommand` 联动
+
+## 1. 本地事件流 WebSocket
+
+对应代码：
 
 - [WsHub.cs](D:\STS2-Link-YOKONEX\src\STS2Bridge\Api\WebSocket\WsHub.cs)
 - [LocalApiServer.cs](D:\STS2-Link-YOKONEX\src\STS2Bridge\Api\LocalApiServer.cs)
 - [RuntimeApiHost.cs](D:\STS2-Link-YOKONEX\src\STS2Bridge\Api\RuntimeApiHost.cs)
-- [GameEvent.cs](D:\STS2-Link-YOKONEX\src\STS2Bridge\Events\GameEvent.cs)
 
-## 1. 连接信息
-
-默认连接地址：
+连接地址：
 
 ```text
 ws://127.0.0.1:15526/ws
 ```
 
-鉴权方式：
+鉴权头：
 
 ```text
 X-STS2-Token: change-me
 ```
 
-默认配置来源：
+当前支持的事件：
 
-- `BindHost = 127.0.0.1`
-- `Port = 15526`
-- `AuthToken = change-me`
-
-配置定义见 [BridgeConfig.cs](D:\STS2-Link-YOKONEX\src\STS2Bridge\Config\BridgeConfig.cs)。
-
-## 2. 前置条件
-
-要收到 WebSocket 事件，前提是桥接服务已经启动。
-
-当前代码现状：
-
-- WebSocket 服务能力已经实现
-- 但当前版本还没有在 [ModEntry.cs](D:\STS2-Link-YOKONEX\src\STS2Bridge\ModEntry.cs) 的 `Initialize()` 中自动调用 `StartApiAsync()`
-
-这意味着：
-
-- 如果你已经在别处手动启动了 `RuntimeApiHost`，可以直接按本文档连接
-- 如果还没有启动 API 宿主，仅安装 Mod 并不会自动打开 `15526` 端口
-
-## 3. 握手流程
-
-客户端连接到 `/ws` 后：
-
-1. 服务端校验 `X-STS2-Token`
-2. 校验通过后升级为 WebSocket
-3. 服务端立即下发一条 `hello` 消息
-4. 后续每产生一个游戏事件，就广播一条 `event` 消息
-
-如果鉴权失败：
-
-- 缺少 Token：HTTP `401`
-- Token 错误：HTTP `403`
-
-## 4. 当前已支持事件
-
-当前已经接入真实运行时并会实际发出的事件：
-
+- `room.entered`
 - `combat.started`
 - `turn.started`
 - `combat.ended`
@@ -74,33 +39,43 @@ X-STS2-Token: change-me
 - `player.block_broken`
 - `player.block_cleared`
 - `player.died`
-- `enemy.hp_changed`
-- `enemy.damaged`
-- `card.played`
 - `item.purchased`
 - `card.upgraded`
 - `reward.selected`
 
-## 5. 快速排查
+## 2. 外部 IM WebSocket 联动
 
-如果连不上，按这个顺序查：
+对应代码：
 
-1. 游戏是否已经加载 `STS2-Link-YOKONEX.dll`
-2. API 宿主是否真的已启动
-3. 本机 `127.0.0.1:15526` 是否在监听
-4. `X-STS2-Token` 是否正确
+- [WEBSOCKET_API.md](D:\STS2-Link-YOKONEX\docs\WEBSOCKET_API.md)
+- [ExternalImWebSocketClient.cs](D:\STS2-Link-YOKONEX\src\STS2Bridge\Integration\ExternalImWebSocketClient.cs)
+- [IMCommandBridgeService.cs](D:\STS2-Link-YOKONEX\src\STS2Bridge\Integration\IMCommandBridgeService.cs)
 
-## 6. 事件开关与设置页
+默认连接地址：
 
-当前版本支持在游戏内设置页里控制事件开关。
+```text
+ws://103.236.55.92:43001
+```
 
-入口：
+默认映射：
 
-- 打开游戏 `Settings`
-- 点击 `STS2-Link-YOKONEX Events`
+- `player.damaged -> player_hurt`
+- `player.healed -> player_heal`
+- `player.block_broken -> player_block_break`
+- `player.block_cleared -> player_block_clear`
+- `player.died -> player_dead`
+- `combat.started -> combat_start`
+- `combat.ended -> combat_end`
+- `turn.started -> turn_start`
+- `card.upgraded -> card_upgraded`
+- `item.purchased -> item_purchased`
+- `reward.selected -> reward_selected`
+- `room.entered -> room_entered`
 
-行为：
+## 3. 排查顺序
 
-- 勾选表示该事件继续通过桥接层发出
-- 取消勾选表示该事件会被 `GameEventBus` 在发布前过滤掉
-- 修改后立即生效，不需要重启游戏
+1. 确认游戏已加载 `STS2-Link-YOKONEX.dll`
+2. 查看 [godot.log](C:\Users\hosgoo\AppData\Roaming\SlayTheSpire2\logs\godot.log)
+3. 确认事件在设置页中处于启用状态
+4. 确认 `UID/Token` 已填写并登录成功
+5. 确认对应事件存在默认或自定义 `commandId`

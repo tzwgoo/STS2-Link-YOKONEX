@@ -5,7 +5,8 @@ namespace STS2Bridge.Ui;
 
 public static class SettingsScreenBridge
 {
-    private const string ButtonNodeName = "STS2LinkYOKONEXEventsButton";
+    private const string EventsButtonNodeName = "STS2LinkYOKONEXEventsButton";
+    private const string LogsButtonNodeName = "STS2LinkYOKONEXLogsButton";
 
     public static void Install(object? settingsScreenInstance)
     {
@@ -14,31 +15,46 @@ public static class SettingsScreenBridge
             return;
         }
 
-        if (settingsScreen.GetNodeOrNull(ButtonNodeName) is not null)
+        if (settingsScreen.GetNodeOrNull(EventsButtonNodeName) is not null ||
+            settingsScreen.GetNodeOrNull(LogsButtonNodeName) is not null)
         {
             return;
         }
 
-        var button = new Button
+        var eventsButton = new Button
         {
-            Name = ButtonNodeName,
+            Name = EventsButtonNodeName,
             Text = "STS2-Link-YOKONEX Events",
             TooltipText = "Open bridge event toggles"
         };
-        button.AnchorLeft = 1;
-        button.AnchorRight = 1;
-        button.AnchorTop = 0;
-        button.AnchorBottom = 0;
-        button.OffsetLeft = -236;
-        button.OffsetRight = -16;
-        button.OffsetTop = 18;
-        button.OffsetBottom = 56;
+        eventsButton.AnchorLeft = 1;
+        eventsButton.AnchorRight = 1;
+        eventsButton.AnchorTop = 0;
+        eventsButton.AnchorBottom = 0;
+        eventsButton.OffsetLeft = -236;
+        eventsButton.OffsetRight = -16;
+        eventsButton.OffsetTop = 18;
+        eventsButton.OffsetBottom = 56;
+        eventsButton.Pressed += EventSettingsUiController.TogglePopup;
+        settingsScreen.AddChild(eventsButton);
 
-        EventSettingsUiController.EnsurePopup(settingsScreen);
+        var logsButton = new Button
+        {
+            Name = LogsButtonNodeName,
+            Text = "STS2-Link-YOKONEX Logs",
+            TooltipText = "Open recent event logs"
+        };
+        logsButton.AnchorLeft = 1;
+        logsButton.AnchorRight = 1;
+        logsButton.AnchorTop = 0;
+        logsButton.AnchorBottom = 0;
+        logsButton.OffsetLeft = -236;
+        logsButton.OffsetRight = -16;
+        logsButton.OffsetTop = 62;
+        logsButton.OffsetBottom = 100;
+        logsButton.Pressed += EventLogUiController.TogglePopup;
+        settingsScreen.AddChild(logsButton);
 
-        button.Pressed += EventSettingsUiController.TogglePopup;
-        settingsScreen.AddChild(button);
-
-        ModLog.Info("Installed STS2-Link-YOKONEX settings button.");
+        ModLog.Info("Installed STS2-Link-YOKONEX settings buttons.");
     }
 }

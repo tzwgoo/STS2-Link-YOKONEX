@@ -1,5 +1,6 @@
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using System.Collections.Immutable;
 
 if (args.Length == 0)
 {
@@ -33,7 +34,7 @@ foreach (var typeHandle in metadataReader.TypeDefinitions)
         var methodName = metadataReader.GetString(methodDef.Name);
         if (patterns.Length == 0 || patterns.Any(pattern => ContainsIgnoreCase(methodName, pattern) || ContainsIgnoreCase(fullTypeName, pattern)))
         {
-            methodMatches.Add(methodName);
+            methodMatches.Add(BuildMethodSignature(metadataReader, methodDef, methodName));
         }
     }
 
@@ -104,3 +105,80 @@ return 0;
 
 static bool ContainsIgnoreCase(string source, string value) =>
     source.Contains(value, StringComparison.OrdinalIgnoreCase);
+
+static string BuildMethodSignature(MetadataReader metadataReader, MethodDefinition methodDef, string methodName)
+{
+    var signature = methodDef.DecodeSignature(new TypeNameProvider(metadataReader), genericContext: null);
+    var parameters = signature.ParameterTypes.Length == 0
+        ? string.Empty
+        : string.Join(", ", signature.ParameterTypes);
+    return $"{signature.ReturnType} {methodName}({parameters})";
+}
+
+file sealed class TypeNameProvider(MetadataReader metadataReader) : ISignatureTypeProvider<string, object?>
+{
+    public string GetArrayType(string elementType, ArrayShape shape) => $"{elementType}[{new string(',', shape.Rank - 1)}]";
+
+    public string GetByReferenceType(string elementType) => $"{elementType}&";
+
+    public string GetFunctionPointerType(MethodSignature<string> signature) => "fnptr";
+
+    public string GetGenericInstantiation(string genericType, ImmutableArray<string> typeArguments) =>
+        $"{genericType}<{string.Join(", ", typeArguments)}>";
+
+    public string GetGenericMethodParameter(object? genericContext, int index) => $"!!{index}";
+
+    public string GetGenericTypeParameter(object? genericContext, int index) => $"!{index}";
+
+    public string GetModifiedType(string modifierType, string unmodifiedType, bool isRequired) => unmodifiedType;
+
+    public string GetPinnedType(string elementType) => elementType;
+
+    public string GetPointerType(string elementType) => $"{elementType}*";
+
+    public string GetPrimitiveType(PrimitiveTypeCode typeCode) => typeCode switch
+    {
+        PrimitiveTypeCode.Void => "void",
+        PrimitiveTypeCode.Boolean => "bool",
+        PrimitiveTypeCode.Char => "char",
+        PrimitiveTypeCode.SByte => "sbyte",
+        PrimitiveTypeCode.Byte => "byte",
+        PrimitiveTypeCode.Int16 => "short",
+        PrimitiveTypeCode.UInt16 => "ushort",
+        PrimitiveTypeCode.Int32 => "int",
+        PrimitiveTypeCode.UInt32 => "uint",
+        PrimitiveTypeCode.Int64 => "long",
+        PrimitiveTypeCode.UInt64 => "ulong",
+        PrimitiveTypeCode.Single => "float",
+        PrimitiveTypeCode.Double => "double",
+        PrimitiveTypeCode.String => "string",
+        PrimitiveTypeCode.IntPtr => "nint",
+        PrimitiveTypeCode.UIntPtr => "nuint",
+        PrimitiveTypeCode.Object => "object",
+        _ => typeCode.ToString()
+    };
+
+    public string GetSZArrayType(string elementType) => $"{elementType}[]";
+
+    public string GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, byte rawTypeKind)
+    {
+        var definition = reader.GetTypeDefinition(handle);
+        var ns = reader.GetString(definition.Namespace);
+        var name = reader.GetString(definition.Name);
+        return string.IsNullOrWhiteSpace(ns) ? name : $"{ns}.{name}";
+    }
+
+    public string GetTypeFromReference(MetadataReader reader, TypeReferenceHandle handle, byte rawTypeKind)
+    {
+        var reference = reader.GetTypeReference(handle);
+        var ns = reader.GetString(reference.Namespace);
+        var name = reader.GetString(reference.Name);
+        return string.IsNullOrWhiteSpace(ns) ? name : $"{ns}.{name}";
+    }
+
+    public string GetTypeFromSpecification(MetadataReader reader, object? genericContext, TypeSpecificationHandle handle, byte rawTypeKind)
+    {
+        var specification = reader.GetTypeSpecification(handle);
+        return specification.DecodeSignature(this, genericContext);
+    }
+}

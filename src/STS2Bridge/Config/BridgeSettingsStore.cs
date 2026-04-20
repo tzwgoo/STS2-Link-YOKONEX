@@ -4,6 +4,9 @@ namespace STS2Bridge.Config;
 
 public sealed class BridgeSettingsStore(string filePath)
 {
+    private const string LegacyDefaultImWebSocketUrl = "ws://103.236.55.92:3001";
+    private const string CurrentDefaultImWebSocketUrl = "ws://103.236.55.92:43001";
+
     public string FilePath { get; } = filePath;
 
     public BridgeSettings Load()
@@ -57,6 +60,47 @@ public sealed class BridgeSettingsStore(string filePath)
             }
         }
 
+        if (!string.IsNullOrWhiteSpace(settings.ImWebSocketUrl))
+        {
+            merged = merged with
+            {
+                ImWebSocketUrl = NormalizeImWebSocketUrl(settings.ImWebSocketUrl)
+            };
+        }
+
+        merged = merged.SetImCredentials(settings.ImUid, settings.ImToken);
+        merged = merged.SetImAutoLogin(settings.ImAutoLogin);
+
+        foreach (var pair in settings.EventCommandMap)
+        {
+            if (EventCatalog.SupportedIds.Contains(pair.Key, StringComparer.OrdinalIgnoreCase)
+                && !string.IsNullOrWhiteSpace(pair.Value))
+            {
+                merged = merged.SetCommandMapping(pair.Key, pair.Value);
+            }
+        }
+
+        foreach (var rule in settings.CommandTriggerRules)
+        {
+            if (!rule.Enabled ||
+                string.IsNullOrWhiteSpace(rule.EventType) ||
+                string.IsNullOrWhiteSpace(rule.CommandId) ||
+                rule.Threshold <= 0 ||
+                rule.RepeatCount <= 0)
+            {
+                continue;
+            }
+
+            merged = merged.AddTriggerRule(rule);
+        }
+
         return merged;
+    }
+
+    private static string NormalizeImWebSocketUrl(string value)
+    {
+        return string.Equals(value, LegacyDefaultImWebSocketUrl, StringComparison.OrdinalIgnoreCase)
+            ? CurrentDefaultImWebSocketUrl
+            : value;
     }
 }

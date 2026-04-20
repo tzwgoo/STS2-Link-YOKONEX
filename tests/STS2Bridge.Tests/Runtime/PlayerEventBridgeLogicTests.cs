@@ -57,6 +57,49 @@ public sealed class PlayerEventBridgeLogicTests
     }
 
     [Fact]
+    public void PublishDamageReceived_should_not_duplicate_player_damaged_after_hp_changed_for_same_hit()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            RunId = "run-player-damage-dedupe",
+            Floor = 12,
+            RoomType = "Combat",
+            Player = new PlayerStateDto(70, 80, 3, 10, 99)
+        });
+
+        var creature = new FakePlayerCreature
+        {
+            PlayerId = "ironclad",
+            CurrentHp = 68,
+            MaxHp = 80,
+            Block = 0
+        };
+
+        var hpPublished = PlayerEventBridgeLogic.PublishHpChanged(eventBus, stateStore, creature, -2);
+        var damagePublished = PlayerEventBridgeLogic.PublishDamageReceived(
+            eventBus,
+            stateStore,
+            creature,
+            new FakeDamageResult
+            {
+                BlockedDamage = 10,
+                UnblockedDamage = 2,
+                WasBlockBroken = true,
+                WasFullyBlocked = false
+            });
+
+        Assert.True(hpPublished);
+        Assert.False(damagePublished);
+
+        var events = eventBus.GetRecentEvents(10);
+        Assert.Equal(2, events.Count);
+        Assert.Equal(EventTypes.PlayerHpChanged, events[0].Type);
+        Assert.Equal(EventTypes.PlayerDamaged, events[1].Type);
+    }
+
+    [Fact]
     public void PublishHpChanged_should_emit_hp_changed_and_healed_for_positive_delta()
     {
         var eventBus = new GameEventBus(20);
@@ -97,6 +140,308 @@ public sealed class PlayerEventBridgeLogicTests
             });
 
         Assert.Equal(52, stateStore.GetSnapshot().Player.Hp);
+    }
+
+    [Fact]
+    public void PublishHpChanged_should_support_player_id_from_nested_state()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            RunId = "run-nested",
+            Floor = 8,
+            RoomType = "Combat",
+            Player = new PlayerStateDto(35, 80, 3, 4, 20)
+        });
+
+        var creature = new FakePlayerCreatureWithNestedState
+        {
+            CurrentHp = 30,
+            MaxHp = 80,
+            Block = 4,
+            State = new FakePlayerState
+            {
+                playerId = "ironclad"
+            }
+        };
+
+        var published = PlayerEventBridgeLogic.PublishHpChanged(eventBus, stateStore, creature, -5);
+
+        Assert.True(published);
+
+        var events = eventBus.GetRecentEvents(10);
+        Assert.Collection(
+            events,
+            item => Assert.Equal("ironclad", GetString(item.Payload, "playerId")),
+            item => Assert.Equal("ironclad", GetString(item.Payload, "playerId")));
+    }
+
+    [Fact]
+    public void PublishHpChanged_should_support_numeric_player_id_from_nested_state()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            RunId = "run-numeric-player-id",
+            Floor = 8,
+            RoomType = "Combat",
+            Player = new PlayerStateDto(35, 80, 3, 4, 20)
+        });
+
+        var creature = new FakePlayerCreatureWithNumericNestedState
+        {
+            State = new FakeNumericPlayerState
+            {
+                playerId = 1UL,
+                currentHp = 30,
+                maxHp = 80,
+                block = 4
+            }
+        };
+
+        var published = PlayerEventBridgeLogic.PublishHpChanged(eventBus, stateStore, creature, -5);
+
+        Assert.True(published);
+
+        var events = eventBus.GetRecentEvents(10);
+        Assert.Collection(
+            events,
+            item => Assert.Equal("1", GetString(item.Payload, "playerId")),
+            item => Assert.Equal("1", GetString(item.Payload, "playerId")));
+    }
+
+    [Fact]
+    public void PublishHpChanged_should_support_all_player_stats_from_nested_state()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            RunId = "run-nested-stats",
+            Floor = 9,
+            RoomType = "Combat",
+            Player = new PlayerStateDto(35, 80, 3, 6, 20)
+        });
+
+        var creature = new FakePlayerCreatureWithStateBackedStats
+        {
+            State = new FakePlayerStateWithStats
+            {
+                playerId = "watcher",
+                currentHp = 27,
+                maxHp = 80,
+                block = 2
+            }
+        };
+
+        var published = PlayerEventBridgeLogic.PublishHpChanged(eventBus, stateStore, creature, -8);
+
+        Assert.True(published);
+
+        var events = eventBus.GetRecentEvents(10);
+        Assert.Collection(
+            events,
+            item =>
+            {
+                Assert.Equal(EventTypes.PlayerHpChanged, item.Type);
+                Assert.Equal("watcher", GetString(item.Payload, "playerId"));
+                Assert.Equal(27, GetInt(item.Payload, "currentHp"));
+                Assert.Equal(2, GetInt(item.Payload, "block"));
+            },
+            item =>
+            {
+                Assert.Equal(EventTypes.PlayerDamaged, item.Type);
+                Assert.Equal(8, GetInt(item.Payload, "amount"));
+            });
+    }
+
+    [Fact]
+    public void IsPlayerCreature_should_support_player_id_from_nested_state()
+    {
+        var creature = new FakePlayerCreatureWithNestedState
+        {
+            CurrentHp = 30,
+            MaxHp = 80,
+            Block = 4,
+            State = new FakePlayerState
+            {
+                playerId = "ironclad"
+            }
+        };
+
+        var result = PlayerEventBridgeLogic.IsPlayerCreature(creature);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void PublishHpChanged_should_fall_back_to_combat_state_player_mapping()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            RunId = "run-combat-state-fallback",
+            Floor = 10,
+            RoomType = "Combat",
+            Player = new PlayerStateDto(35, 80, 3, 6, 20)
+        });
+
+        var creature = new FakeCombatLinkedCreature
+        {
+            State = new FakeCombatLinkedCreatureState
+            {
+                currentHp = 29,
+                maxHp = 80,
+                block = 3
+            }
+        };
+
+        var combatState = new FakeCombatState();
+        combatState.PlayerCreatures = [creature];
+        combatState.Players = [new FakeCombatPlayer { NetId = 7UL, Creature = creature }];
+        creature.CombatState = combatState;
+
+        var published = PlayerEventBridgeLogic.PublishHpChanged(eventBus, stateStore, creature, -6);
+
+        Assert.True(published);
+
+        var events = eventBus.GetRecentEvents(10);
+        Assert.Collection(
+            events,
+            item =>
+            {
+                Assert.Equal(EventTypes.PlayerHpChanged, item.Type);
+                Assert.Equal("7", GetString(item.Payload, "playerId"));
+                Assert.Equal(29, GetInt(item.Payload, "currentHp"));
+            },
+            item => Assert.Equal(EventTypes.PlayerDamaged, item.Type));
+    }
+
+    [Fact]
+    public void PublishHpChanged_should_use_player_creature_match_when_player_creatures_collection_is_missing()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            RunId = "run-single-player-fallback",
+            Floor = 11,
+            RoomType = "Combat",
+            Player = new PlayerStateDto(35, 80, 3, 6, 20)
+        });
+
+        var creature = new FakeCombatLinkedCreature
+        {
+            State = new FakeCombatLinkedCreatureState
+            {
+                currentHp = 31,
+                maxHp = 80,
+                block = 2
+            },
+            CombatId = 42
+        };
+
+        creature.CombatState = new FakeCombatState
+        {
+            Players = [new FakeCombatPlayer { NetId = 9UL, Creature = creature }]
+        };
+
+        var published = PlayerEventBridgeLogic.PublishHpChanged(eventBus, stateStore, creature, -4);
+
+        Assert.True(published);
+
+        var events = eventBus.GetRecentEvents(10);
+        Assert.Collection(
+            events,
+            item => Assert.Equal("9", GetString(item.Payload, "playerId")),
+            item => Assert.Equal("9", GetString(item.Payload, "playerId")));
+    }
+
+    [Fact]
+    public void PublishHpChanged_should_not_treat_unmapped_combat_creature_as_player()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            RunId = "run-unmapped-creature",
+            Floor = 11,
+            RoomType = "Combat",
+            Player = new PlayerStateDto(35, 80, 3, 6, 20)
+        });
+
+        var creature = new FakeCombatLinkedCreature
+        {
+            State = new FakeCombatLinkedCreatureState
+            {
+                currentHp = 19,
+                maxHp = 40,
+                block = 0
+            },
+            CombatId = 77
+        };
+
+        creature.CombatState = new FakeCombatState
+        {
+            Players = [new FakeCombatPlayer { NetId = 9UL }]
+        };
+
+        var published = PlayerEventBridgeLogic.PublishHpChanged(eventBus, stateStore, creature, -4);
+
+        Assert.False(published);
+        Assert.Empty(eventBus.GetRecentEvents(10));
+        Assert.Equal(35, stateStore.GetSnapshot().Player.Hp);
+    }
+
+    [Fact]
+    public void PublishHpChanged_should_not_match_different_creatures_only_by_same_combat_id()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            RunId = "run-same-combat-id",
+            Floor = 11,
+            RoomType = "Combat",
+            Player = new PlayerStateDto(35, 80, 3, 6, 20)
+        });
+
+        var playerCreature = new FakeCombatLinkedCreature
+        {
+            State = new FakeCombatLinkedCreatureState
+            {
+                currentHp = 35,
+                maxHp = 80,
+                block = 6
+            },
+            CombatId = 42
+        };
+
+        var enemyCreature = new FakeCombatLinkedCreature
+        {
+            State = new FakeCombatLinkedCreatureState
+            {
+                currentHp = 18,
+                maxHp = 40,
+                block = 0
+            },
+            CombatId = 42
+        };
+
+        enemyCreature.CombatState = new FakeCombatState
+        {
+            Players = [new FakeCombatPlayer { NetId = 9UL, Creature = playerCreature }],
+            PlayerCreatures = [playerCreature]
+        };
+
+        var published = PlayerEventBridgeLogic.PublishHpChanged(eventBus, stateStore, enemyCreature, -2);
+
+        Assert.False(published);
+        Assert.Empty(eventBus.GetRecentEvents(10));
+        Assert.Equal(35, stateStore.GetSnapshot().Player.Hp);
     }
 
     [Fact]
@@ -231,7 +576,67 @@ public sealed class PlayerEventBridgeLogicTests
     }
 
     [Fact]
-    public void PublishBlockBrokenFromTransition_should_emit_block_changed_and_block_broken()
+    public void PublishBlockLossFromTransition_should_support_damage_reason()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            Player = new PlayerStateDto(41, 70, 3, 12, 0)
+        });
+
+        var creature = new FakePlayerCreature
+        {
+            PlayerId = "ironclad",
+            CurrentHp = 41,
+            MaxHp = 70,
+            Block = 7
+        };
+
+        var published = PlayerEventBridgeLogic.PublishBlockLossFromTransition(eventBus, stateStore, creature, 12, "damaged");
+
+        Assert.True(published);
+
+        var gameEvent = Assert.Single(eventBus.GetRecentEvents(10));
+        Assert.Equal(EventTypes.PlayerBlockChanged, gameEvent.Type);
+        Assert.Equal(-5, GetInt(gameEvent.Payload, "delta"));
+        Assert.Equal("damaged", GetString(gameEvent.Payload, "reason"));
+    }
+
+    [Fact]
+    public void PublishBlockLossFromTransition_should_support_nested_state_block_values()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            Player = new PlayerStateDto(41, 70, 3, 12, 0)
+        });
+
+        var creature = new FakePlayerCreatureWithStateBackedStats
+        {
+            State = new FakePlayerStateWithStats
+            {
+                playerId = "ironclad",
+                currentHp = 41,
+                maxHp = 70,
+                block = 7
+            }
+        };
+
+        var published = PlayerEventBridgeLogic.PublishBlockLossFromTransition(eventBus, stateStore, creature, 12, "damaged");
+
+        Assert.True(published);
+
+        var gameEvent = Assert.Single(eventBus.GetRecentEvents(10));
+        Assert.Equal(EventTypes.PlayerBlockChanged, gameEvent.Type);
+        Assert.Equal(-5, GetInt(gameEvent.Payload, "delta"));
+        Assert.Equal(7, GetInt(gameEvent.Payload, "block"));
+        Assert.Equal("damaged", GetString(gameEvent.Payload, "reason"));
+    }
+
+    [Fact]
+    public void PublishBlockBrokenFromTransition_should_emit_only_block_broken()
     {
         var eventBus = new GameEventBus(20);
         var stateStore = new GameStateStore();
@@ -252,22 +657,93 @@ public sealed class PlayerEventBridgeLogicTests
 
         Assert.True(published);
 
+        var gameEvent = Assert.Single(eventBus.GetRecentEvents(10));
+        Assert.Equal(EventTypes.PlayerBlockBroken, gameEvent.Type);
+        Assert.Equal("watcher", GetString(gameEvent.Payload, "playerId"));
+        Assert.Equal(8, GetInt(gameEvent.Payload, "previousBlock"));
+        Assert.Equal(0, GetInt(gameEvent.Payload, "block"));
+    }
+
+    [Fact]
+    public void PublishDamageReceived_should_emit_only_player_damaged()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            RunId = "run-damage-result",
+            Floor = 13,
+            RoomType = "Combat",
+            Player = new PlayerStateDto(35, 80, 3, 6, 0)
+        });
+
+        var creature = new FakePlayerCreature
+        {
+            PlayerId = "ironclad",
+            CurrentHp = 30,
+            MaxHp = 80,
+            Block = 1
+        };
+
+        var result = new FakeDamageResult
+        {
+            BlockedDamage = 5,
+            UnblockedDamage = 5,
+            WasBlockBroken = false,
+            WasFullyBlocked = false
+        };
+
+        var published = PlayerEventBridgeLogic.PublishDamageReceived(eventBus, stateStore, creature, result);
+
+        Assert.True(published);
+
+        var gameEvent = Assert.Single(eventBus.GetRecentEvents(10));
+        Assert.Equal(EventTypes.PlayerDamaged, gameEvent.Type);
+        Assert.Equal(5, GetInt(gameEvent.Payload, "amount"));
+        Assert.Equal(30, GetInt(gameEvent.Payload, "currentHp"));
+    }
+
+    [Fact]
+    public void PublishDamageReceived_should_support_nested_state_stats()
+    {
+        var eventBus = new GameEventBus(20);
+        var stateStore = new GameStateStore();
+        stateStore.Update(StateSnapshotDto.Empty with
+        {
+            RunId = "run-damage-result-nested",
+            Floor = 13,
+            RoomType = "Combat",
+            Player = new PlayerStateDto(35, 80, 3, 6, 0)
+        });
+
+        var creature = new FakePlayerCreatureWithStateBackedStats
+        {
+            State = new FakePlayerStateWithStats
+            {
+                playerId = "watcher",
+                currentHp = 28,
+                maxHp = 80,
+                block = 0
+            }
+        };
+
+        var result = new FakeDamageResult
+        {
+            BlockedDamage = 2,
+            UnblockedDamage = 7,
+            WasBlockBroken = true,
+            WasFullyBlocked = false
+        };
+
+        var published = PlayerEventBridgeLogic.PublishDamageReceived(eventBus, stateStore, creature, result);
+
+        Assert.True(published);
+
         var events = eventBus.GetRecentEvents(10);
-        Assert.Collection(
-            events,
-            item =>
-            {
-                Assert.Equal(EventTypes.PlayerBlockChanged, item.Type);
-                Assert.Equal(-8, GetInt(item.Payload, "delta"));
-                Assert.Equal("broken", GetString(item.Payload, "reason"));
-            },
-            item =>
-            {
-                Assert.Equal(EventTypes.PlayerBlockBroken, item.Type);
-                Assert.Equal("watcher", GetString(item.Payload, "playerId"));
-                Assert.Equal(8, GetInt(item.Payload, "previousBlock"));
-                Assert.Equal(0, GetInt(item.Payload, "block"));
-            });
+        var gameEvent = Assert.Single(events);
+        Assert.Equal(EventTypes.PlayerDamaged, gameEvent.Type);
+        Assert.Equal("watcher", GetString(gameEvent.Payload, "playerId"));
+        Assert.Equal(7, GetInt(gameEvent.Payload, "amount"));
     }
 
     [Fact]
@@ -440,5 +916,96 @@ public sealed class PlayerEventBridgeLogicTests
         public int MaxHp { get; init; }
 
         public int Block { get; init; }
+    }
+
+    private sealed class FakePlayerCreatureWithNestedState
+    {
+        public FakePlayerState? State { get; init; }
+
+        public int CurrentHp { get; init; }
+
+        public int MaxHp { get; init; }
+
+        public int Block { get; init; }
+    }
+
+    private sealed class FakePlayerState
+    {
+        public string? playerId { get; init; }
+    }
+
+    private sealed class FakePlayerCreatureWithStateBackedStats
+    {
+        public FakePlayerStateWithStats? State { get; init; }
+    }
+
+    private sealed class FakePlayerStateWithStats
+    {
+        public string? playerId { get; init; }
+
+        public int currentHp { get; init; }
+
+        public int maxHp { get; init; }
+
+        public int block { get; init; }
+    }
+
+    private sealed class FakePlayerCreatureWithNumericNestedState
+    {
+        public FakeNumericPlayerState? State { get; init; }
+    }
+
+    private sealed class FakeNumericPlayerState
+    {
+        public ulong playerId { get; init; }
+
+        public int currentHp { get; init; }
+
+        public int maxHp { get; init; }
+
+        public int block { get; init; }
+    }
+
+    private sealed class FakeCombatLinkedCreature
+    {
+        public FakeCombatState? CombatState { get; set; }
+
+        public FakeCombatLinkedCreatureState? State { get; init; }
+
+        public uint? CombatId { get; init; }
+    }
+
+    private sealed class FakeCombatLinkedCreatureState
+    {
+        public int currentHp { get; init; }
+
+        public int maxHp { get; init; }
+
+        public int block { get; init; }
+    }
+
+    private sealed class FakeCombatState
+    {
+        public IReadOnlyList<object> PlayerCreatures { get; set; } = [];
+
+        public IReadOnlyList<object> Players { get; set; } = [];
+    }
+
+    private sealed class FakeCombatPlayer
+    {
+        public ulong NetId { get; init; }
+
+        public object? Creature { get; init; }
+    }
+
+    private sealed class FakeDamageResult
+    {
+        public int BlockedDamage { get; init; }
+
+        public int UnblockedDamage { get; init; }
+
+        public bool WasBlockBroken { get; init; }
+
+        public bool WasFullyBlocked { get; init; }
     }
 }

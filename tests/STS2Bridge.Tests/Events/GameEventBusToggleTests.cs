@@ -8,10 +8,10 @@ public sealed class GameEventBusToggleTests
     [Fact]
     public void Publish_should_skip_events_disabled_at_runtime()
     {
-        var toggles = new EventToggleService(BridgeSettings.CreateDefault().SetEventEnabled(EventTypes.CardPlayed, false));
-        var bus = new GameEventBus(10, new[] { EventTypes.CardPlayed }, toggles.IsEventEnabled);
+        var toggles = new EventToggleService(BridgeSettings.CreateDefault().SetEventEnabled(EventTypes.PlayerEnergyChanged, false));
+        var bus = new GameEventBus(10, new[] { EventTypes.PlayerEnergyChanged }, toggles.IsEventEnabled);
 
-        bus.Publish(new GameEvent("evt-1", EventTypes.CardPlayed, "run-1", 1, "Combat", new { }));
+        bus.Publish(new GameEvent("evt-1", EventTypes.PlayerEnergyChanged, "run-1", 1, "Combat", new { delta = -1 }));
 
         Assert.Empty(bus.GetRecentEvents(10));
     }
@@ -19,11 +19,11 @@ public sealed class GameEventBusToggleTests
     [Fact]
     public void Publish_should_pick_up_toggle_changes_without_recreating_bus()
     {
-        var toggles = new EventToggleService(BridgeSettings.CreateDefault().SetEventEnabled(EventTypes.CardPlayed, false));
-        var bus = new GameEventBus(10, new[] { EventTypes.CardPlayed }, toggles.IsEventEnabled);
+        var toggles = new EventToggleService(BridgeSettings.CreateDefault().SetEventEnabled(EventTypes.PlayerEnergyChanged, false));
+        var bus = new GameEventBus(10, new[] { EventTypes.PlayerEnergyChanged }, toggles.IsEventEnabled);
 
-        toggles.SetEventEnabled(EventTypes.CardPlayed, true);
-        bus.Publish(new GameEvent("evt-1", EventTypes.CardPlayed, "run-1", 1, "Combat", new { }));
+        toggles.SetEventEnabled(EventTypes.PlayerEnergyChanged, true);
+        bus.Publish(new GameEvent("evt-1", EventTypes.PlayerEnergyChanged, "run-1", 1, "Combat", new { delta = -1 }));
 
         Assert.Single(bus.GetRecentEvents(10));
     }

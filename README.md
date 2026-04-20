@@ -1,14 +1,10 @@
 # STS2-Link-YOKONEX
 
-`STS2-Link-YOKONEX` 是一个面向《Slay the Spire 2》本地联动场景的 Mod 桥接项目。
-
-它的目标是把游戏里的状态、事件和动作统一抽象成稳定的本地接口，方便外部程序通过 HTTP / WebSocket 读取游戏状态、监听事件，或向游戏发送动作请求。
-
-当前仓库已经完成了真实 STS2 Mod 环境接入，并支持在游戏内运行、产出事件、打开设置页和切换事件开关。
+`STS2-Link-YOKONEX` 是一个面向《Slay the Spire 2》的本地桥接 Mod。它负责把游戏内状态、事件和动作统一暴露为本地接口，并支持把指定游戏事件联动到外部 IM WebSocket 服务的 `sendCommand` 指令。
 
 ## 当前能力
 
-### API
+### 本地 API
 
 - `GET /health`
 - `GET /version`
@@ -27,7 +23,6 @@
 - `combat.started`
 - `turn.started`
 - `combat.ended`
-- `card.played`
 - `player.hp_changed`
 - `player.damaged`
 - `player.healed`
@@ -36,8 +31,6 @@
 - `player.block_broken`
 - `player.block_cleared`
 - `player.died`
-- `enemy.hp_changed`
-- `enemy.damaged`
 - `item.purchased`
 - `card.upgraded`
 - `reward.selected`
@@ -52,11 +45,15 @@
 
 ## 游戏内功能
 
-### 事件设置页
+### 事件与 IM 联动设置页
 
-项目会在游戏 `Settings` 页面里注入 `STS2-Link-YOKONEX Events` 入口。
+项目会在游戏 `Settings` 页面注入 `STS2-Link-YOKONEX Events` 入口。
 
-你可以在面板里逐项开启或关闭事件，修改后立即生效，并持久化到本地配置文件。
+面板中包含：
+
+- 事件开关：控制事件是否继续通过桥接层发出
+- IM 联动：填写 `UID`、`Token`，显示服务器地址、连接状态，并提供登录/登出按钮
+- 阈值规则：支持“玩家掉血 N 点 / 掉甲 N 点，触发 M 次”
 
 默认配置文件路径：
 
@@ -66,130 +63,59 @@ C:\Users\<你的用户名>\AppData\Roaming\SlayTheSpire2\mods\STS2-Link-YOKONEX\
 
 ### 快捷键
 
-- 默认快捷键：`F8`
-- 作用：打开或关闭 `STS2-Link-YOKONEX Events` 面板
+- `F8`
+- 用于打开或关闭 `STS2-Link-YOKONEX Events` 面板
 
-## 目录结构
+## 外部 IM 联动
 
-```text
-src/STS2Bridge
-tests/STS2Bridge.Tests
-docs/
-scripts/
-test-client/python
-tools/Sts2MetadataInspector
-```
+默认事件映射：
 
-## 开发环境
+- `player.damaged -> player_hurt`
+- `player.healed -> player_heal`
+- `player.block_broken -> player_block_break`
+- `player.block_cleared -> player_block_clear`
+- `player.died -> player_dead`
+- `combat.started -> combat_start`
+- `combat.ended -> combat_end`
+- `turn.started -> turn_start`
+- `card.upgraded -> card_upgraded`
+- `item.purchased -> item_purchased`
+- `reward.selected -> reward_selected`
+- `room.entered -> room_entered`
 
-项目当前使用：
-
-- `.NET 9`
-- 游戏自带 `sts2.dll`
-- 游戏自带 `GodotSharp.dll`
-- 游戏自带 `0Harmony.dll`
-
-游戏目录通过 [Directory.Build.props](D:\STS2-Link-YOKONEX\Directory.Build.props) 里的 `STS2GameDir` 配置。
-
-当前本地联调使用的 STS2 游戏目录是：
+默认服务地址：
 
 ```text
-D:\Users\hosgoo\Downloads\Slay the Spire 2\Slay the Spire 2\data_sts2_windows_x86_64
+ws://103.236.55.92:43001
 ```
 
 ## 构建与测试
 
-### 构建
+构建：
 
 ```powershell
 dotnet build D:\STS2-Link-YOKONEX\src\STS2Bridge\STS2-Link-YOKONEX.csproj -c Release
 ```
 
-构建后会整理出最小 Mod 包目录：
-
-```text
-D:\STS2-Link-YOKONEX\artifacts\mods\STS2-Link-YOKONEX
-```
-
-### 测试
+测试：
 
 ```powershell
 dotnet test D:\STS2-Link-YOKONEX\tests\STS2Bridge.Tests\STS2-Link-YOKONEX.Tests.csproj
 ```
 
-## 安装到游戏
-
-可以直接运行安装脚本：
+安装到游戏：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File D:\STS2-Link-YOKONEX\scripts\install-mod.ps1
 ```
-
-当前脚本会把最新产物安装到：
-
-```text
-D:\Users\hosgoo\Downloads\Slay the Spire 2\Slay the Spire 2\mods\STS2-Link-YOKONEX
-```
-
-预期结构类似：
-
-```text
-<游戏目录>\mods\STS2-Link-YOKONEX\STS2-Link-YOKONEX.dll
-<游戏目录>\mods\STS2-Link-YOKONEX\STS2-Link-YOKONEX.json
-```
-
-## 如何验证
-
-### 1. 验证 Mod 是否加载
-
-启动游戏后查看日志：
-
-[godot.log](C:\Users\hosgoo\AppData\Roaming\SlayTheSpire2\logs\godot.log)
-
-确认日志中存在类似内容：
-
-- `Found mod manifest file`
-- `Loading assembly DLL`
-- `Calling initializer method of type STS2Bridge.ModEntry`
-- `Finished mod initialization for 'STS2-Link-YOKONEX'`
-
-### 2. 验证设置页与快捷键
-
-- 打开游戏 `Settings`
-- 找到 `STS2-Link-YOKONEX Events`
-- 点击后确认面板能打开
-- 在主菜单或游戏内按 `F8`
-- 确认面板能打开或关闭
-
-### 3. 验证事件流
-
-推荐配合 Python 示例客户端：
-
-[demo_client.py](D:\STS2-Link-YOKONEX\test-client\python\demo_client.py)
-
-你也可以结合文档查看协议：
-
-- [websocket-integration.md](D:\STS2-Link-YOKONEX\docs\websocket-integration.md)
-- [protocol.md](D:\STS2-Link-YOKONEX\docs\protocol.md)
-
-### 4. 验证事件开关是否即时生效
-
-- 在设置页关闭某个事件，例如 `card.played`
-- 回到游戏执行对应行为
-- 确认不再收到该事件
-- 再重新开启它，确认事件恢复
 
 ## 重要文档
 
 - [install-and-verify.md](D:\STS2-Link-YOKONEX\docs\install-and-verify.md)
 - [runtime-integration-notes.md](D:\STS2-Link-YOKONEX\docs\runtime-integration-notes.md)
 - [websocket-integration.md](D:\STS2-Link-YOKONEX\docs\websocket-integration.md)
+- [event-command-map.md](D:\STS2-Link-YOKONEX\docs\event-command-map.md)
+- [WEBSOCKET_API.md](D:\STS2-Link-YOKONEX\docs\WEBSOCKET_API.md)
 - [actions.md](D:\STS2-Link-YOKONEX\docs\actions.md)
 - [events.md](D:\STS2-Link-YOKONEX\docs\events.md)
 - [protocol.md](D:\STS2-Link-YOKONEX\docs\protocol.md)
-
-## 当前边界
-
-- `card.upgraded` 目前稳定覆盖 `rest_site_smith` 和 `forge`，还没有做到所有升级来源全覆盖
-- API 宿主、动作路由和事件桥接已可用，但仍在持续补更细的运行时字段
-- 项目以本地真实游戏目录联调为主，切换机器时需要同步更新 `STS2GameDir`

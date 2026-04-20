@@ -2,5 +2,5 @@ namespace STS2Bridge.Hooks;
 
 public static class CardHooks
 {
-    public static IReadOnlyList<string> DescribeHooks() => ["card.played"];
+    public static IReadOnlyList<string> DescribeHooks() => [];
 }

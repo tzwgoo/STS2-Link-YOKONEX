@@ -14,8 +14,9 @@ internal static class RoomHookPatches
         [HarmonyPostfix]
         private static void Postfix(object?[] __args)
         {
+            var runState = __args is { Length: > 0 } ? __args[0] : null;
             var room = RoomEventBridgeLogic.FindRoomArgument(__args);
-            RoomEventBridgeLogic.PublishRoomEntered(ModEntry.EventBus, ModEntry.StateStore, room);
+            RoomEventBridgeLogic.PublishRoomEntered(ModEntry.EventBus, ModEntry.StateStore, runState, room);
         }
     }
 

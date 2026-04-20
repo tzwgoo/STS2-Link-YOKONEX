@@ -1,3 +1,4 @@
+using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Modding;
 using STS2Bridge.Actions;
@@ -9,6 +10,8 @@ using STS2Bridge.Logging;
 using STS2Bridge.Runtime;
 using STS2Bridge.State;
 using STS2Bridge.Threading;
+using STS2Bridge.Integration;
+using System.Text;
 
 namespace STS2Bridge;
 
@@ -17,7 +20,10 @@ public static class ModEntry
 {
     private static RuntimeApiHost? _apiHost;
     private static IDisposable? _combatManagerBridgeSubscription;
+    private static IMCommandBridgeService? _imCommandBridgeService;
+    private static IExternalImClient? _externalImClient;
     private static BridgeSettingsStore? _settingsStore;
+    private static string? _debugLogPath;
 
     public static BridgeConfig Config { get; private set; } = BridgeConfig.CreateDefault();
 
@@ -31,6 +37,8 @@ public static class ModEntry
 
     public static ActionRouter ActionRouter { get; private set; } = ActionRouter.CreateDefault(Config, Dispatcher, StateStore, EventBus);
 
+    public static ExternalImStatus ImStatus => _externalImClient?.Status ?? new();
+
     public static void Initialize()
     {
         ModLog.Info("STS2-Link-YOKONEX initializing...");
@@ -38,12 +46,19 @@ public static class ModEntry
         try
         {
             Config = BridgeConfig.CreateDefault();
+            _debugLogPath = Path.Combine(
+                Path.GetDirectoryName(BridgeSettingsStore.GetDefaultPath()) ?? string.Empty,
+                "bridge-debug.log");
+            ModLog.SetSink(Config.EnableDebugLog ? WriteDebugLine : null);
             _settingsStore = new BridgeSettingsStore(BridgeSettingsStore.GetDefaultPath());
             EventToggles = new EventToggleService(_settingsStore.Load());
             EventBus = new GameEventBus(200, Config.EventWhitelist, EventToggles.IsEventEnabled);
             StateStore = new GameStateStore();
             Dispatcher = new MainThreadDispatcher();
             ActionRouter = ActionRouter.CreateDefault(Config, Dispatcher, StateStore, EventBus);
+            _externalImClient = new ExternalImWebSocketClient();
+            _imCommandBridgeService?.Dispose();
+            _imCommandBridgeService = new IMCommandBridgeService(EventBus, _externalImClient, () => EventToggles.GetSettings());
 
             var harmonyResult = HookGuard.Run("patch-all", () =>
             {
@@ -64,6 +79,13 @@ public static class ModEntry
             ModLog.Info($"Hook install result: success={harmonyResult.Success}, message={harmonyResult.Message}");
             ModLog.Info($"CombatManager bridge result: success={combatManagerHookResult.Success}, message={combatManagerHookResult.Message}");
             ModLog.Info($"Detected game version: {GameVersionDetector.Detect()}");
+
+            var settings = EventToggles.GetSettings();
+            if (settings.ImAutoLogin && !string.IsNullOrWhiteSpace(settings.ImUid) && !string.IsNullOrWhiteSpace(settings.ImToken))
+            {
+                _ = LoginImAsync();
+            }
+
             ModLog.Info("STS2-Link-YOKONEX initialized.");
         }
         catch (Exception ex)
@@ -85,5 +107,60 @@ public static class ModEntry
     public static void SaveSettings()
     {
         _settingsStore?.Save(EventToggles.GetSettings());
+    }
+
+    public static void UpdateSettings(BridgeSettings settings)
+    {
+        EventToggles.UpdateSettings(_ => settings);
+    }
+
+    public static async Task LoginImAsync(CancellationToken cancellationToken = default)
+    {
+        if (_externalImClient is null)
+        {
+            return;
+        }
+
+        var settings = EventToggles.GetSettings();
+        if (string.IsNullOrWhiteSpace(settings.ImUid) || string.IsNullOrWhiteSpace(settings.ImToken))
+        {
+            return;
+        }
+
+        await _externalImClient.ConnectAsync(settings.ImWebSocketUrl, cancellationToken);
+        await _externalImClient.LoginAsync(settings.ImUid, settings.ImToken, cancellationToken);
+    }
+
+    public static async Task LogoutImAsync(CancellationToken cancellationToken = default)
+    {
+        if (_externalImClient is null)
+        {
+            return;
+        }
+
+        await _externalImClient.LogoutAsync(cancellationToken);
+    }
+
+    private static void WriteDebugLine(string line)
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(_debugLogPath))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(_debugLogPath)!);
+                File.AppendAllText(_debugLogPath, line + System.Environment.NewLine, new UTF8Encoding(false));
+            }
+        }
+        catch
+        {
+        }
+
+        try
+        {
+            GD.Print(line);
+        }
+        catch
+        {
+        }
     }
 }

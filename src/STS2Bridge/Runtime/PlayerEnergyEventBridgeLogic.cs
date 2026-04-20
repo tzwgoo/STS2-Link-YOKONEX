@@ -7,7 +7,7 @@ namespace STS2Bridge.Runtime;
 internal static class PlayerEnergyEventBridgeLogic
 {
     private static readonly string[] PlayerMemberNames = ["Player", "player", "_player"];
-    private static readonly string[] PlayerIdMemberNames = ["PlayerId", "playerId"];
+    private static readonly string[] PlayerIdMemberNames = ["PlayerId", "playerId", "NetId", "netId"];
     private static readonly string[] EnergyMemberNames = ["Energy", "energy"];
     private static readonly string[] MaxEnergyMemberNames = ["MaxEnergy", "maxEnergy"];
 
@@ -18,13 +18,21 @@ internal static class PlayerEnergyEventBridgeLogic
             return false;
         }
 
-        var delta = snapshot.Energy - previousEnergy;
+        var state = stateStore.GetSnapshot();
+        if (snapshot.Energy == state.Player.Energy)
+        {
+            return false;
+        }
+
+        var baselineEnergy = previousEnergy == snapshot.Energy
+            ? state.Player.Energy
+            : previousEnergy;
+        var delta = snapshot.Energy - baselineEnergy;
         if (delta == 0)
         {
             return false;
         }
 
-        var state = stateStore.GetSnapshot();
         stateStore.Update(state with
         {
             Player = state.Player with
@@ -67,7 +75,11 @@ internal static class PlayerEnergyEventBridgeLogic
         }
 
         var player = GetFirstExistingMember(playerCombatState, PlayerMemberNames);
-        if (!RuntimeReflectionHelpers.TryGetString(player, PlayerIdMemberNames, out var playerId) ||
+        var playerIdResolved =
+            RuntimeReflectionHelpers.TryGetIdentifierString(player, PlayerIdMemberNames, out var playerId) ||
+            RuntimeReflectionHelpers.TryGetIdentifierString(playerCombatState, PlayerIdMemberNames, out playerId);
+
+        if (!playerIdResolved ||
             !RuntimeReflectionHelpers.TryGetInt(playerCombatState, EnergyMemberNames, out var energy) ||
             !RuntimeReflectionHelpers.TryGetInt(playerCombatState, MaxEnergyMemberNames, out var maxEnergy))
         {

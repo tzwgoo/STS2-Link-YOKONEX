@@ -8,6 +8,7 @@ public sealed class GameEventBus
     private readonly HashSet<string>? _whitelist;
     private readonly Func<string, bool>? _isEventEnabled;
     private readonly int _capacity;
+    private long _recentVersion;
     private event Action<GameEvent>? EventPublished;
 
     public GameEventBus(int capacity = 200, IEnumerable<string>? whitelist = null, Func<string, bool>? isEventEnabled = null)
@@ -22,6 +23,8 @@ public sealed class GameEventBus
         EventPublished += handler;
         return new Subscription(() => EventPublished -= handler);
     }
+
+    public long RecentVersion => Interlocked.Read(ref _recentVersion);
 
     public void Publish(GameEvent gameEvent)
     {
@@ -40,12 +43,23 @@ public sealed class GameEventBus
         {
         }
 
+        Interlocked.Increment(ref _recentVersion);
+
         EventPublished?.Invoke(gameEvent);
     }
 
     public IReadOnlyList<GameEvent> GetRecentEvents(int limit)
     {
         return _recentEvents.Reverse().Take(Math.Max(0, limit)).Reverse().ToArray();
+    }
+
+    public void ClearRecentEvents()
+    {
+        while (_recentEvents.TryDequeue(out _))
+        {
+        }
+
+        Interlocked.Increment(ref _recentVersion);
     }
 
     private sealed class Subscription(Action unsubscribe) : IDisposable

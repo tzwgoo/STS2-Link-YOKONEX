@@ -6,6 +6,6 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisLevel>latest</AnalysisLevel>
-    <STS2GameDir>D:\Users\hosgoo\Downloads\Slay the Spire 2\Slay the Spire 2\data_sts2_windows_x86_64</STS2GameDir>
+    <STS2GameDir>D:\Program Files (x86)\Steam\steamapps\common\Slay the Spire 2\data_sts2_windows_x86_64</STS2GameDir>
   </PropertyGroup>
 </Project>

@@ -22,6 +22,10 @@ public sealed class RoomEventBridgeLogicTests
         var published = RoomEventBridgeLogic.PublishRoomEntered(
             eventBus,
             stateStore,
+            new FakeRunState
+            {
+                TotalFloor = 7
+            },
             new FakeRoom
             {
                 RoomType = FakeRoomType.Shop,
@@ -34,8 +38,10 @@ public sealed class RoomEventBridgeLogicTests
         Assert.Equal(EventTypes.RoomEntered, gameEvent.Type);
         Assert.Equal("shop", GetString(gameEvent.Payload, "roomType"));
         Assert.Equal("merchant_room_01", GetString(gameEvent.Payload, "modelId"));
+        Assert.Equal(7, GetInt(gameEvent.Payload, "floor"));
         Assert.Equal("hook.after_room_entered", GetString(gameEvent.Payload, "source"));
         Assert.Equal("shop", stateStore.GetSnapshot().RoomType);
+        Assert.Equal(7, stateStore.GetSnapshot().Floor);
     }
 
     [Fact]
@@ -78,6 +84,12 @@ public sealed class RoomEventBridgeLogicTests
         return Assert.IsType<string>(value);
     }
 
+    private static int GetInt(object payload, string propertyName)
+    {
+        var value = payload.GetType().GetProperty(propertyName)?.GetValue(payload);
+        return Assert.IsType<int>(value);
+    }
+
     private sealed class FakeRoom
     {
         public FakeRoomType RoomType { get; init; }
@@ -90,6 +102,11 @@ public sealed class RoomEventBridgeLogicTests
         public string? roomType { get; init; }
 
         public string? modelId { get; init; }
+    }
+
+    private sealed class FakeRunState
+    {
+        public int TotalFloor { get; init; }
     }
 
     private enum FakeRoomType

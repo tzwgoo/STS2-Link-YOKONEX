@@ -33,4 +33,12 @@ public sealed class EventToggleService
             _settings = _settings.SetEventEnabled(eventType, enabled);
         }
     }
+
+    public void UpdateSettings(Func<BridgeSettings, BridgeSettings> update)
+    {
+        lock (_lock)
+        {
+            _settings = update(_settings);
+        }
+    }
 }

@@ -1,15 +1,24 @@
 # 事件说明
 
-当前首版骨架保留以下事件名与扩展位：
+当前项目保留并支持以下事件：
 
 - `room.entered`
 - `combat.started`
 - `combat.ended`
 - `turn.started`
-- `card.played`
+- `player.hp_changed`
+- `player.damaged`
+- `player.healed`
+- `player.energy_changed`
+- `player.block_changed`
+- `player.block_broken`
+- `player.block_cleared`
+- `player.died`
 - `reward.opened`
 - `reward.selected`
 - `event.option_selected`
+- `item.purchased`
+- `card.upgraded`
 
 事件结构：
 
@@ -24,5 +33,3 @@
   "payload": {}
 }
 ```
-
-当前仓库中的 Hook 仍为占位结构，真实事件采集需要在接入 STS2 运行时后补全。
