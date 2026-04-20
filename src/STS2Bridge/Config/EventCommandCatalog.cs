@@ -15,6 +15,8 @@ public static class EventCommandCatalog
             [EventTypes.PlayerBlockBroken] = "player_block_break",
             [EventTypes.PlayerBlockCleared] = "player_block_clear",
             [EventTypes.PlayerDied] = "player_dead",
+            [EventTypes.OrbPassiveTriggered] = "orb_passive_triggered",
+            [EventTypes.OrbEvoked] = "orb_evoked",
             [EventTypes.CombatStarted] = "combat_start",
             [EventTypes.CombatEnded] = "combat_end",
             [EventTypes.TurnStarted] = "turn_start",

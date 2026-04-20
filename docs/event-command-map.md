@@ -18,9 +18,28 @@
 | 玩家破甲 | `player.block_broken` | `player_block_break` | 玩家格挡被打破时触发 |
 | 玩家格挡清空 | `player.block_cleared` | `player_block_clear` | 玩家格挡被清空时触发 |
 | 玩家死亡 | `player.died` | `player_dead` | 玩家死亡时触发 |
+| 球体被动触发 | `orb.passive_triggered` | `orb_passive_triggered` | 球体执行被动效果时触发 |
+| 球体激发 | `orb.evoked` | `orb_evoked` | 球体被激发时触发 |
 | 卡牌升级 | `card.upgraded` | `card_upgraded` | 当前覆盖休息点升级与部分 forge 流程 |
 | 购买道具 | `item.purchased` | `item_purchased` | 商店购买成功时触发 |
 | 选择奖励 | `reward.selected` | `reward_selected` | 奖励被拿走后触发 |
+
+## 球体事件补充
+
+球体事件统一通过 payload 区分具体球体：
+
+- `orbType = lightning`
+- `orbType = frost`
+- `orbType = dark`
+- `orbType = plasma`
+
+如需把不同球体映射到不同外部命令，建议在消费端根据：
+
+- `type`
+- `payload.orbType`
+- `payload.amountKind`
+
+做二次路由。
 
 ## 阈值规则
 
@@ -33,6 +52,6 @@
 
 ## 相关文件
 
-- 默认映射定义：[EventCommandCatalog.cs](D:\STS2-Link-YOKONEX\src\STS2Bridge\Config\EventCommandCatalog.cs)
-- 事件目录定义：[EventCatalog.cs](D:\STS2-Link-YOKONEX\src\STS2Bridge\Config\EventCatalog.cs)
-- 规则模型：[CommandTriggerRule.cs](D:\STS2-Link-YOKONEX\src\STS2Bridge\Config\CommandTriggerRule.cs)
+- 默认映射定义：[EventCommandCatalog.cs](/D:/STS2-Link-YOKONEX/src/STS2Bridge/Config/EventCommandCatalog.cs)
+- 事件目录定义：[EventCatalog.cs](/D:/STS2-Link-YOKONEX/src/STS2Bridge/Config/EventCatalog.cs)
+- 规则模型：[CommandTriggerRule.cs](/D:/STS2-Link-YOKONEX/src/STS2Bridge/Config/CommandTriggerRule.cs)

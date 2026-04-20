@@ -21,6 +21,8 @@ public sealed class EventCatalogTests
         Assert.Contains(EventTypes.PlayerBlockBroken, ids);
         Assert.Contains(EventTypes.PlayerBlockCleared, ids);
         Assert.Contains(EventTypes.PlayerDied, ids);
+        Assert.Contains(EventTypes.OrbPassiveTriggered, ids);
+        Assert.Contains(EventTypes.OrbEvoked, ids);
     }
 
     [Fact]

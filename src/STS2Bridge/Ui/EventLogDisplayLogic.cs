@@ -27,6 +27,8 @@ public static class EventLogDisplayLogic
             EventTypes.PlayerHealed => BuildPlayerHealedSummary(gameEvent),
             EventTypes.PlayerBlockChanged => BuildPlayerBlockChangedSummary(gameEvent),
             EventTypes.PlayerEnergyChanged => BuildPlayerEnergyChangedSummary(gameEvent),
+            EventTypes.OrbPassiveTriggered => BuildOrbSummary(gameEvent, "被动"),
+            EventTypes.OrbEvoked => BuildOrbSummary(gameEvent, "激发"),
             EventTypes.CombatStarted => "战斗开始",
             EventTypes.CombatEnded => "战斗结束",
             EventTypes.RoomEntered => "进入新房间",
@@ -96,6 +98,50 @@ public static class EventLogDisplayLogic
         }
 
         return BuildFallbackSummary(gameEvent.Payload);
+    }
+
+    private static string BuildOrbSummary(GameEvent gameEvent, string triggerName)
+    {
+        var orbType = NormalizeOrbType(GetString(gameEvent.Payload, "orbType"));
+        var amountKind = NormalizeAmountKind(GetString(gameEvent.Payload, "amountKind"));
+        var amount = GetInt(gameEvent.Payload, "amount");
+        var ownerId = GetString(gameEvent.Payload, "ownerId");
+
+        if (!string.IsNullOrWhiteSpace(orbType) && amount.HasValue)
+        {
+            var summary = $"{orbType}球{triggerName}，{amountKind} {amount.Value}";
+            if (!string.IsNullOrWhiteSpace(ownerId) && !string.Equals(ownerId, "unknown", StringComparison.OrdinalIgnoreCase))
+            {
+                summary += $"，拥有者 {ownerId}";
+            }
+
+            return summary;
+        }
+
+        return BuildFallbackSummary(gameEvent.Payload);
+    }
+
+    private static string NormalizeOrbType(string? orbType)
+    {
+        return orbType?.ToLowerInvariant() switch
+        {
+            "lightning" => "闪电",
+            "frost" => "冰霜",
+            "dark" => "黑暗",
+            "plasma" => "等离子",
+            _ => orbType ?? string.Empty
+        };
+    }
+
+    private static string NormalizeAmountKind(string? amountKind)
+    {
+        return amountKind?.ToLowerInvariant() switch
+        {
+            "damage" => "伤害",
+            "block" => "格挡",
+            "energy" => "能量",
+            _ => amountKind ?? "数值"
+        };
     }
 
     private static string BuildFallbackSummary(object payload)

@@ -18,6 +18,8 @@ public static class EventCatalog
         new(EventTypes.PlayerBlockBroken, "玩家破甲", "Player Block Broken"),
         new(EventTypes.PlayerBlockCleared, "玩家格挡清空", "Player Block Cleared"),
         new(EventTypes.PlayerDied, "玩家死亡", "Player Died"),
+        new(EventTypes.OrbPassiveTriggered, "充能球被动触发", "Orb Passive Triggered"),
+        new(EventTypes.OrbEvoked, "充能球激发", "Orb Evoked"),
         new(EventTypes.CardUpgraded, "卡牌升级", "Card Upgraded"),
         new(EventTypes.ItemPurchased, "购买道具", "Item Purchased"),
         new(EventTypes.RewardSelected, "选择奖励", "Reward Selected")

@@ -14,6 +14,8 @@ public static class EventTypes
     public const string PlayerBlockBroken = "player.block_broken";
     public const string PlayerBlockCleared = "player.block_cleared";
     public const string PlayerDied = "player.died";
+    public const string OrbPassiveTriggered = "orb.passive_triggered";
+    public const string OrbEvoked = "orb.evoked";
     public const string CardUpgraded = "card.upgraded";
     public const string ItemPurchased = "item.purchased";
     public const string RewardOpened = "reward.opened";

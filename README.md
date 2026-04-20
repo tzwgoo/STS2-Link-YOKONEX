@@ -31,6 +31,8 @@
 - `player.block_broken`
 - `player.block_cleared`
 - `player.died`
+- `orb.passive_triggered`
+- `orb.evoked`
 - `item.purchased`
 - `card.upgraded`
 - `reward.selected`
@@ -52,7 +54,7 @@
 面板中包含：
 
 - 事件开关：控制事件是否继续通过桥接层发出
-- IM 联动：填写 `UID`、`Token`，显示服务器地址、连接状态，并提供登录/登出按钮
+- IM 联动：填写 `UID`、`Token`，显示服务器地址、连接状态，并提供登录 / 登出按钮
 - 阈值规则：支持“玩家掉血 N 点 / 掉甲 N 点，触发 M 次”
 
 默认配置文件路径：
@@ -75,6 +77,8 @@ C:\Users\<你的用户名>\AppData\Roaming\SlayTheSpire2\mods\STS2-Link-YOKONEX\
 - `player.block_broken -> player_block_break`
 - `player.block_cleared -> player_block_clear`
 - `player.died -> player_dead`
+- `orb.passive_triggered -> orb_passive_triggered`
+- `orb.evoked -> orb_evoked`
 - `combat.started -> combat_start`
 - `combat.ended -> combat_end`
 - `turn.started -> turn_start`
@@ -88,6 +92,35 @@ C:\Users\<你的用户名>\AppData\Roaming\SlayTheSpire2\mods\STS2-Link-YOKONEX\
 ```text
 ws://103.236.55.92:43001
 ```
+
+## 球体事件
+
+新增统一球体事件：
+
+- `orb.passive_triggered`
+- `orb.evoked`
+
+当前支持球体：
+
+- `lightning`
+- `frost`
+- `dark`
+- `plasma`
+
+事件 payload 统一包含：
+
+- `orbType`
+- `amountKind`
+- `amount`
+- `ownerId`
+- `displayName`
+
+其中：
+
+- `lightning` 的 `amountKind` 为 `damage`
+- `frost` 的 `amountKind` 为 `block`
+- `dark` 的 `amountKind` 为 `damage`
+- `plasma` 的 `amountKind` 为 `energy`
 
 ## 构建与测试
 
@@ -111,11 +144,11 @@ powershell -ExecutionPolicy Bypass -File D:\STS2-Link-YOKONEX\scripts\install-mo
 
 ## 重要文档
 
-- [install-and-verify.md](D:\STS2-Link-YOKONEX\docs\install-and-verify.md)
-- [runtime-integration-notes.md](D:\STS2-Link-YOKONEX\docs\runtime-integration-notes.md)
-- [websocket-integration.md](D:\STS2-Link-YOKONEX\docs\websocket-integration.md)
-- [event-command-map.md](D:\STS2-Link-YOKONEX\docs\event-command-map.md)
-- [WEBSOCKET_API.md](D:\STS2-Link-YOKONEX\docs\WEBSOCKET_API.md)
-- [actions.md](D:\STS2-Link-YOKONEX\docs\actions.md)
-- [events.md](D:\STS2-Link-YOKONEX\docs\events.md)
-- [protocol.md](D:\STS2-Link-YOKONEX\docs\protocol.md)
+- [install-and-verify.md](/D:/STS2-Link-YOKONEX/docs/install-and-verify.md)
+- [runtime-integration-notes.md](/D:/STS2-Link-YOKONEX/docs/runtime-integration-notes.md)
+- [websocket-integration.md](/D:/STS2-Link-YOKONEX/docs/websocket-integration.md)
+- [event-command-map.md](/D:/STS2-Link-YOKONEX/docs/event-command-map.md)
+- [WEBSOCKET_API.md](/D:/STS2-Link-YOKONEX/docs/WEBSOCKET_API.md)
+- [actions.md](/D:/STS2-Link-YOKONEX/docs/actions.md)
+- [events.md](/D:/STS2-Link-YOKONEX/docs/events.md)
+- [protocol.md](/D:/STS2-Link-YOKONEX/docs/protocol.md)
