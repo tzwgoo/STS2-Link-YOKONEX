@@ -40,7 +40,7 @@ public sealed class EventLogDisplayLogicTests
     {
         var gameEvent = new GameEvent(
             "evt-2",
-            EventTypes.OrbPassiveTriggered,
+            EventTypes.FrostOrbPassiveTriggered,
             "run-1",
             8,
             "Combat",
@@ -58,7 +58,7 @@ public sealed class EventLogDisplayLogicTests
     {
         var gameEvent = new GameEvent(
             "evt-3",
-            EventTypes.OrbEvoked,
+            EventTypes.PlasmaOrbEvoked,
             "run-1",
             8,
             "Combat",
@@ -69,6 +69,14 @@ public sealed class EventLogDisplayLogicTests
         Assert.Contains("等离子球激发", summary);
         Assert.Contains("能量 2", summary);
         Assert.DoesNotContain("拥有者", summary);
+    }
+
+    [Fact]
+    public void BuildTitle_should_render_split_orb_event_name()
+    {
+        var gameEvent = new GameEvent("evt-4", EventTypes.DarkOrbEvoked, "run-1", 8, "Combat", new { orbType = "dark", amountKind = "damage", amount = 12 });
+
+        Assert.Equal("黑暗球激发", EventLogDisplayLogic.BuildTitle(gameEvent));
     }
 
     [Fact]

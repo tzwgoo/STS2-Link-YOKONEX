@@ -27,7 +27,7 @@ public sealed class OrbEventBridgeLogicTests
         Assert.True(published);
 
         var gameEvent = Assert.Single(eventBus.GetRecentEvents(10));
-        Assert.Equal(EventTypes.OrbPassiveTriggered, gameEvent.Type);
+        Assert.Equal(EventTypes.LightningOrbPassiveTriggered, gameEvent.Type);
         Assert.Equal("lightning", GetString(gameEvent.Payload, "orbType"));
         Assert.Equal("damage", GetString(gameEvent.Payload, "amountKind"));
         Assert.Equal(3, GetInt(gameEvent.Payload, "amount"));
@@ -57,7 +57,7 @@ public sealed class OrbEventBridgeLogicTests
         Assert.True(published);
 
         var gameEvent = Assert.Single(eventBus.GetRecentEvents(10));
-        Assert.Equal(EventTypes.OrbPassiveTriggered, gameEvent.Type);
+        Assert.Equal(GetExpectedPassiveEventType(orbType), gameEvent.Type);
         Assert.Equal(orbType, GetString(gameEvent.Payload, "orbType"));
         Assert.Equal(amountKind, GetString(gameEvent.Payload, "amountKind"));
         Assert.Equal(passiveAmount, GetInt(gameEvent.Payload, "amount"));
@@ -87,7 +87,7 @@ public sealed class OrbEventBridgeLogicTests
         Assert.True(published);
 
         var gameEvent = Assert.Single(eventBus.GetRecentEvents(10));
-        Assert.Equal(EventTypes.OrbEvoked, gameEvent.Type);
+        Assert.Equal(GetExpectedEvokedEventType(orbType), gameEvent.Type);
         Assert.Equal(orbType, GetString(gameEvent.Payload, "orbType"));
         Assert.Equal(amountKind, GetString(gameEvent.Payload, "amountKind"));
         Assert.Equal(evokeAmount, GetInt(gameEvent.Payload, "amount"));
@@ -124,6 +124,30 @@ public sealed class OrbEventBridgeLogicTests
         });
 
         return stateStore;
+    }
+
+    private static string GetExpectedPassiveEventType(string orbType)
+    {
+        return orbType switch
+        {
+            "lightning" => EventTypes.LightningOrbPassiveTriggered,
+            "frost" => EventTypes.FrostOrbPassiveTriggered,
+            "dark" => EventTypes.DarkOrbPassiveTriggered,
+            "plasma" => EventTypes.PlasmaOrbPassiveTriggered,
+            _ => throw new ArgumentOutOfRangeException(nameof(orbType), orbType, null)
+        };
+    }
+
+    private static string GetExpectedEvokedEventType(string orbType)
+    {
+        return orbType switch
+        {
+            "lightning" => EventTypes.LightningOrbEvoked,
+            "frost" => EventTypes.FrostOrbEvoked,
+            "dark" => EventTypes.DarkOrbEvoked,
+            "plasma" => EventTypes.PlasmaOrbEvoked,
+            _ => throw new ArgumentOutOfRangeException(nameof(orbType), orbType, null)
+        };
     }
 
     private static int GetInt(object payload, string propertyName)

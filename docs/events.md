@@ -14,8 +14,14 @@
 - `player.block_broken`
 - `player.block_cleared`
 - `player.died`
-- `orb.passive_triggered`
-- `orb.evoked`
+- `orb.lightning.passive_triggered`
+- `orb.lightning.evoked`
+- `orb.frost.passive_triggered`
+- `orb.frost.evoked`
+- `orb.dark.passive_triggered`
+- `orb.dark.evoked`
+- `orb.plasma.passive_triggered`
+- `orb.plasma.evoked`
 - `reward.opened`
 - `reward.selected`
 - `event.option_selected`
@@ -38,32 +44,32 @@
 
 ## 球体事件结构
 
-### `orb.passive_triggered`
+### `orb.frost.passive_triggered`
 
 ```json
 {
   "eventId": "evt-2",
-  "type": "orb.passive_triggered",
+  "type": "orb.frost.passive_triggered",
   "timestamp": 1710000001,
   "runId": "run-1",
   "floor": 8,
   "roomType": "Combat",
   "payload": {
-    "orbType": "lightning",
-    "amountKind": "damage",
-    "amount": 3,
+    "orbType": "frost",
+    "amountKind": "block",
+    "amount": 2,
     "ownerId": "7",
-    "displayName": "lightning.passive"
+    "displayName": "frost.passive"
   }
 }
 ```
 
-### `orb.evoked`
+### `orb.plasma.evoked`
 
 ```json
 {
   "eventId": "evt-3",
-  "type": "orb.evoked",
+  "type": "orb.plasma.evoked",
   "timestamp": 1710000002,
   "runId": "run-1",
   "floor": 8,
@@ -80,7 +86,7 @@
 
 ## 球体类型与含义
 
-当前统一事件支持以下球体：
+当前球体事件支持以下球体：
 
 | 球体 | `orbType` | `amountKind` | 说明 |
 | --- | --- | --- | --- |
@@ -91,6 +97,7 @@
 
 ## 说明
 
+- 球体事件现在已经按球种拆分为独立 `type`，不再共用两条通用球体事件
 - `ownerId` 会尽量从球体拥有者对象中解析，解析不到时为 `unknown`
 - `amount` 直接取游戏运行时对象上的 `PassiveVal` 或 `EvokeVal`
 - 当前球体事件不会改写状态快照，只通过事件总线广播

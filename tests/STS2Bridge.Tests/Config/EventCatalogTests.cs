@@ -21,8 +21,14 @@ public sealed class EventCatalogTests
         Assert.Contains(EventTypes.PlayerBlockBroken, ids);
         Assert.Contains(EventTypes.PlayerBlockCleared, ids);
         Assert.Contains(EventTypes.PlayerDied, ids);
-        Assert.Contains(EventTypes.OrbPassiveTriggered, ids);
-        Assert.Contains(EventTypes.OrbEvoked, ids);
+        Assert.Contains(EventTypes.LightningOrbPassiveTriggered, ids);
+        Assert.Contains(EventTypes.LightningOrbEvoked, ids);
+        Assert.Contains(EventTypes.FrostOrbPassiveTriggered, ids);
+        Assert.Contains(EventTypes.FrostOrbEvoked, ids);
+        Assert.Contains(EventTypes.DarkOrbPassiveTriggered, ids);
+        Assert.Contains(EventTypes.DarkOrbEvoked, ids);
+        Assert.Contains(EventTypes.PlasmaOrbPassiveTriggered, ids);
+        Assert.Contains(EventTypes.PlasmaOrbEvoked, ids);
     }
 
     [Fact]
@@ -34,6 +40,10 @@ public sealed class EventCatalogTests
         Assert.Equal("player_hurt", EventCommandCatalog.DefaultMap[EventTypes.PlayerDamaged]);
         Assert.Equal("player_energy_changed", EventCommandCatalog.DefaultMap[EventTypes.PlayerEnergyChanged]);
         Assert.Equal("player_dead", EventCommandCatalog.DefaultMap[EventTypes.PlayerDied]);
+        Assert.Equal("orb_lightning_passive_triggered", EventCommandCatalog.DefaultMap[EventTypes.LightningOrbPassiveTriggered]);
+        Assert.Equal("orb_frost_evoked", EventCommandCatalog.DefaultMap[EventTypes.FrostOrbEvoked]);
+        Assert.Equal("orb_dark_passive_triggered", EventCommandCatalog.DefaultMap[EventTypes.DarkOrbPassiveTriggered]);
+        Assert.Equal("orb_plasma_evoked", EventCommandCatalog.DefaultMap[EventTypes.PlasmaOrbEvoked]);
         Assert.Equal("reward_selected", EventCommandCatalog.DefaultMap[EventTypes.RewardSelected]);
         Assert.Equal("room_entered", EventCommandCatalog.DefaultMap[EventTypes.RoomEntered]);
     }

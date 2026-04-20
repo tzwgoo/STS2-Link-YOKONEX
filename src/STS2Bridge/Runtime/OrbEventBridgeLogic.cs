@@ -13,12 +13,12 @@ internal static class OrbEventBridgeLogic
 
     public static bool PublishPassiveTriggered(GameEventBus eventBus, GameStateStore stateStore, object? orb, string orbType, string amountKind)
     {
-        return Publish(eventBus, stateStore, orb, EventTypes.OrbPassiveTriggered, orbType, amountKind, PassiveValueMemberNames, "passive");
+        return Publish(eventBus, stateStore, orb, GetPassiveEventType(orbType), orbType, amountKind, PassiveValueMemberNames, "passive");
     }
 
     public static bool PublishEvoked(GameEventBus eventBus, GameStateStore stateStore, object? orb, string orbType, string amountKind)
     {
-        return Publish(eventBus, stateStore, orb, EventTypes.OrbEvoked, orbType, amountKind, EvokeValueMemberNames, "evoked");
+        return Publish(eventBus, stateStore, orb, GetEvokedEventType(orbType), orbType, amountKind, EvokeValueMemberNames, "evoked");
     }
 
     private static bool Publish(
@@ -77,5 +77,29 @@ internal static class OrbEventBridgeLogic
         }
 
         return false;
+    }
+
+    private static string GetPassiveEventType(string orbType)
+    {
+        return orbType.ToLowerInvariant() switch
+        {
+            "lightning" => EventTypes.LightningOrbPassiveTriggered,
+            "frost" => EventTypes.FrostOrbPassiveTriggered,
+            "dark" => EventTypes.DarkOrbPassiveTriggered,
+            "plasma" => EventTypes.PlasmaOrbPassiveTriggered,
+            _ => throw new ArgumentOutOfRangeException(nameof(orbType), orbType, "Unsupported orb type.")
+        };
+    }
+
+    private static string GetEvokedEventType(string orbType)
+    {
+        return orbType.ToLowerInvariant() switch
+        {
+            "lightning" => EventTypes.LightningOrbEvoked,
+            "frost" => EventTypes.FrostOrbEvoked,
+            "dark" => EventTypes.DarkOrbEvoked,
+            "plasma" => EventTypes.PlasmaOrbEvoked,
+            _ => throw new ArgumentOutOfRangeException(nameof(orbType), orbType, "Unsupported orb type.")
+        };
     }
 }

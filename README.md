@@ -31,8 +31,14 @@
 - `player.block_broken`
 - `player.block_cleared`
 - `player.died`
-- `orb.passive_triggered`
-- `orb.evoked`
+- `orb.lightning.passive_triggered`
+- `orb.lightning.evoked`
+- `orb.frost.passive_triggered`
+- `orb.frost.evoked`
+- `orb.dark.passive_triggered`
+- `orb.dark.evoked`
+- `orb.plasma.passive_triggered`
+- `orb.plasma.evoked`
 - `item.purchased`
 - `card.upgraded`
 - `reward.selected`
@@ -77,8 +83,14 @@ C:\Users\<你的用户名>\AppData\Roaming\SlayTheSpire2\mods\STS2-Link-YOKONEX\
 - `player.block_broken -> player_block_break`
 - `player.block_cleared -> player_block_clear`
 - `player.died -> player_dead`
-- `orb.passive_triggered -> orb_passive_triggered`
-- `orb.evoked -> orb_evoked`
+- `orb.lightning.passive_triggered -> orb_lightning_passive_triggered`
+- `orb.lightning.evoked -> orb_lightning_evoked`
+- `orb.frost.passive_triggered -> orb_frost_passive_triggered`
+- `orb.frost.evoked -> orb_frost_evoked`
+- `orb.dark.passive_triggered -> orb_dark_passive_triggered`
+- `orb.dark.evoked -> orb_dark_evoked`
+- `orb.plasma.passive_triggered -> orb_plasma_passive_triggered`
+- `orb.plasma.evoked -> orb_plasma_evoked`
 - `combat.started -> combat_start`
 - `combat.ended -> combat_end`
 - `turn.started -> turn_start`
@@ -95,10 +107,16 @@ ws://103.236.55.92:43001
 
 ## 球体事件
 
-新增统一球体事件：
+当前球体事件已经拆分为 8 条独立事件：
 
-- `orb.passive_triggered`
-- `orb.evoked`
+- `orb.lightning.passive_triggered`
+- `orb.lightning.evoked`
+- `orb.frost.passive_triggered`
+- `orb.frost.evoked`
+- `orb.dark.passive_triggered`
+- `orb.dark.evoked`
+- `orb.plasma.passive_triggered`
+- `orb.plasma.evoked`
 
 当前支持球体：
 
