@@ -20,17 +20,10 @@ public sealed record BridgeConfig
 
     public IReadOnlyList<string> EventWhitelist { get; init; } =
     [
-        "room.entered",
-        "combat.started",
-        "combat.ended",
-        "turn.started",
-        "player.hp_changed",
         "player.damaged",
         "player.healed",
         "player.energy_changed",
-        "player.block_changed",
         "player.block_broken",
-        "player.block_cleared",
         "player.died",
         "card.upgraded",
         "item.purchased",

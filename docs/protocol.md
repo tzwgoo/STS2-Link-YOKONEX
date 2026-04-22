@@ -50,14 +50,16 @@ X-STS2-Token: change-me
 ```json
 {
   "kind": "event",
-  "type": "combat.started",
+  "type": "player.damaged",
   "timestamp": 1710000000,
   "data": {
     "eventId": "evt-1",
     "runId": "run-1",
     "floor": 1,
     "roomType": "MonsterRoom",
-    "payload": {}
+    "payload": {
+      "amount": 2
+    }
   }
 }
 ```

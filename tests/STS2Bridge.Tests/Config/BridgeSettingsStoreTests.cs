@@ -16,7 +16,7 @@ public sealed class BridgeSettingsStoreTests
 
             var settings = store.Load();
 
-            Assert.True(settings.IsEventEnabled(EventTypes.CombatStarted));
+            Assert.True(settings.IsEventEnabled(EventTypes.PlayerDamaged));
             Assert.True(settings.IsEventEnabled(EventTypes.PlayerDied));
             Assert.Equal("ws://103.236.55.92:43001", settings.ImWebSocketUrl);
             Assert.Equal(string.Empty, settings.ImUid);
@@ -48,7 +48,7 @@ public sealed class BridgeSettingsStoreTests
             var loaded = store.Load();
 
             Assert.False(loaded.IsEventEnabled(EventTypes.PlayerEnergyChanged));
-            Assert.True(loaded.IsEventEnabled(EventTypes.CombatStarted));
+            Assert.True(loaded.IsEventEnabled(EventTypes.PlayerDamaged));
             Assert.Equal("987654", loaded.ImUid);
             Assert.Equal("token-123", loaded.ImToken);
             Assert.True(loaded.ImAutoLogin);

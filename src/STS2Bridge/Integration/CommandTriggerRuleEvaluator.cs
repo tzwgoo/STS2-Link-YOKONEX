@@ -27,15 +27,18 @@ internal static class CommandTriggerRuleEvaluator
         return gameEvent.Type switch
         {
             EventTypes.PlayerDamaged => TryGetInt(element, "amount"),
-            EventTypes.PlayerBlockChanged => GetBlockLossValue(element),
+            EventTypes.PlayerBlockBroken => GetBlockBrokenValue(element),
             _ => 0
         };
     }
 
-    private static int GetBlockLossValue(JsonElement element)
+    private static int GetBlockBrokenValue(JsonElement element)
     {
-        var delta = TryGetNullableInt(element, "delta");
-        return delta is < 0 ? Math.Abs(delta.Value) : 0;
+        var previousBlock = TryGetNullableInt(element, "previousBlock");
+        var block = TryGetNullableInt(element, "block");
+        return previousBlock.HasValue && block.HasValue && previousBlock.Value > block.Value
+            ? previousBlock.Value - block.Value
+            : 0;
     }
 
     private static int TryGetInt(JsonElement element, string propertyName)

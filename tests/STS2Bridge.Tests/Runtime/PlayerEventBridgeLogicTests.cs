@@ -8,7 +8,7 @@ namespace STS2Bridge.Tests.Runtime;
 public sealed class PlayerEventBridgeLogicTests
 {
     [Fact]
-    public void PublishHpChanged_should_emit_hp_changed_and_damaged_for_negative_delta()
+    public void PublishHpChanged_should_emit_damaged_for_negative_delta()
     {
         var eventBus = new GameEventBus(20);
         var stateStore = new GameStateStore();
@@ -33,22 +33,10 @@ public sealed class PlayerEventBridgeLogicTests
         Assert.True(published);
 
         var events = eventBus.GetRecentEvents(10);
-        Assert.Collection(
-            events,
-            item =>
-            {
-                Assert.Equal(EventTypes.PlayerHpChanged, item.Type);
-                Assert.Equal(-9, GetInt(item.Payload, "delta"));
-                Assert.Equal(61, GetInt(item.Payload, "currentHp"));
-                Assert.Equal(80, GetInt(item.Payload, "maxHp"));
-                Assert.Equal(9, GetInt(item.Payload, "block"));
-            },
-            item =>
-            {
-                Assert.Equal(EventTypes.PlayerDamaged, item.Type);
-                Assert.Equal(9, GetInt(item.Payload, "amount"));
-                Assert.Equal(61, GetInt(item.Payload, "currentHp"));
-            });
+        var gameEvent = Assert.Single(events);
+        Assert.Equal(EventTypes.PlayerDamaged, gameEvent.Type);
+        Assert.Equal(9, GetInt(gameEvent.Payload, "amount"));
+        Assert.Equal(61, GetInt(gameEvent.Payload, "currentHp"));
 
         var snapshot = stateStore.GetSnapshot();
         Assert.Equal(61, snapshot.Player.Hp);
@@ -94,13 +82,12 @@ public sealed class PlayerEventBridgeLogicTests
         Assert.False(damagePublished);
 
         var events = eventBus.GetRecentEvents(10);
-        Assert.Equal(2, events.Count);
-        Assert.Equal(EventTypes.PlayerHpChanged, events[0].Type);
-        Assert.Equal(EventTypes.PlayerDamaged, events[1].Type);
+        var gameEvent = Assert.Single(events);
+        Assert.Equal(EventTypes.PlayerDamaged, gameEvent.Type);
     }
 
     [Fact]
-    public void PublishHpChanged_should_emit_hp_changed_and_healed_for_positive_delta()
+    public void PublishHpChanged_should_emit_healed_for_positive_delta()
     {
         var eventBus = new GameEventBus(20);
         var stateStore = new GameStateStore();
@@ -125,19 +112,10 @@ public sealed class PlayerEventBridgeLogicTests
         Assert.True(published);
 
         var events = eventBus.GetRecentEvents(10);
-        Assert.Collection(
-            events,
-            item =>
-            {
-                Assert.Equal(EventTypes.PlayerHpChanged, item.Type);
-                Assert.Equal(12, GetInt(item.Payload, "delta"));
-                Assert.Equal("silent", GetString(item.Payload, "playerId"));
-            },
-            item =>
-            {
-                Assert.Equal(EventTypes.PlayerHealed, item.Type);
-                Assert.Equal(12, GetInt(item.Payload, "amount"));
-            });
+        var gameEvent = Assert.Single(events);
+        Assert.Equal(EventTypes.PlayerHealed, gameEvent.Type);
+        Assert.Equal(12, GetInt(gameEvent.Payload, "amount"));
+        Assert.Equal("silent", GetString(gameEvent.Payload, "playerId"));
 
         Assert.Equal(52, stateStore.GetSnapshot().Player.Hp);
     }
@@ -171,10 +149,8 @@ public sealed class PlayerEventBridgeLogicTests
         Assert.True(published);
 
         var events = eventBus.GetRecentEvents(10);
-        Assert.Collection(
-            events,
-            item => Assert.Equal("ironclad", GetString(item.Payload, "playerId")),
-            item => Assert.Equal("ironclad", GetString(item.Payload, "playerId")));
+        var gameEvent = Assert.Single(events);
+        Assert.Equal("ironclad", GetString(gameEvent.Payload, "playerId"));
     }
 
     [Fact]
@@ -206,10 +182,8 @@ public sealed class PlayerEventBridgeLogicTests
         Assert.True(published);
 
         var events = eventBus.GetRecentEvents(10);
-        Assert.Collection(
-            events,
-            item => Assert.Equal("1", GetString(item.Payload, "playerId")),
-            item => Assert.Equal("1", GetString(item.Payload, "playerId")));
+        var gameEvent = Assert.Single(events);
+        Assert.Equal("1", GetString(gameEvent.Payload, "playerId"));
     }
 
     [Fact]
@@ -241,20 +215,10 @@ public sealed class PlayerEventBridgeLogicTests
         Assert.True(published);
 
         var events = eventBus.GetRecentEvents(10);
-        Assert.Collection(
-            events,
-            item =>
-            {
-                Assert.Equal(EventTypes.PlayerHpChanged, item.Type);
-                Assert.Equal("watcher", GetString(item.Payload, "playerId"));
-                Assert.Equal(27, GetInt(item.Payload, "currentHp"));
-                Assert.Equal(2, GetInt(item.Payload, "block"));
-            },
-            item =>
-            {
-                Assert.Equal(EventTypes.PlayerDamaged, item.Type);
-                Assert.Equal(8, GetInt(item.Payload, "amount"));
-            });
+        var gameEvent = Assert.Single(events);
+        Assert.Equal(EventTypes.PlayerDamaged, gameEvent.Type);
+        Assert.Equal("watcher", GetString(gameEvent.Payload, "playerId"));
+        Assert.Equal(8, GetInt(gameEvent.Payload, "amount"));
     }
 
     [Fact]
@@ -309,15 +273,10 @@ public sealed class PlayerEventBridgeLogicTests
         Assert.True(published);
 
         var events = eventBus.GetRecentEvents(10);
-        Assert.Collection(
-            events,
-            item =>
-            {
-                Assert.Equal(EventTypes.PlayerHpChanged, item.Type);
-                Assert.Equal("7", GetString(item.Payload, "playerId"));
-                Assert.Equal(29, GetInt(item.Payload, "currentHp"));
-            },
-            item => Assert.Equal(EventTypes.PlayerDamaged, item.Type));
+        var gameEvent = Assert.Single(events);
+        Assert.Equal(EventTypes.PlayerDamaged, gameEvent.Type);
+        Assert.Equal("7", GetString(gameEvent.Payload, "playerId"));
+        Assert.Equal(29, GetInt(gameEvent.Payload, "currentHp"));
     }
 
     [Fact]
@@ -354,10 +313,8 @@ public sealed class PlayerEventBridgeLogicTests
         Assert.True(published);
 
         var events = eventBus.GetRecentEvents(10);
-        Assert.Collection(
-            events,
-            item => Assert.Equal("9", GetString(item.Payload, "playerId")),
-            item => Assert.Equal("9", GetString(item.Payload, "playerId")));
+        var gameEvent = Assert.Single(events);
+        Assert.Equal("9", GetString(gameEvent.Payload, "playerId"));
     }
 
     [Fact]
@@ -445,7 +402,7 @@ public sealed class PlayerEventBridgeLogicTests
     }
 
     [Fact]
-    public void PublishBlockChanged_should_emit_block_changed_and_refresh_snapshot()
+    public void PublishBlockChanged_should_refresh_snapshot_without_emitting_event()
     {
         var eventBus = new GameEventBus(20);
         var stateStore = new GameStateStore();
@@ -469,12 +426,7 @@ public sealed class PlayerEventBridgeLogicTests
 
         Assert.True(published);
 
-        var events = eventBus.GetRecentEvents(10);
-        var gameEvent = Assert.Single(events);
-        Assert.Equal(EventTypes.PlayerBlockChanged, gameEvent.Type);
-        Assert.Equal(7, GetInt(gameEvent.Payload, "delta"));
-        Assert.Equal(11, GetInt(gameEvent.Payload, "block"));
-        Assert.Equal("gained", GetString(gameEvent.Payload, "reason"));
+        Assert.Empty(eventBus.GetRecentEvents(10));
 
         var snapshot = stateStore.GetSnapshot();
         Assert.Equal(55, snapshot.Player.Hp);
@@ -482,7 +434,7 @@ public sealed class PlayerEventBridgeLogicTests
     }
 
     [Fact]
-    public void PublishBlockChanged_should_support_block_cleared_when_delta_is_unknown()
+    public void PublishBlockChanged_should_refresh_snapshot_when_delta_is_unknown()
     {
         var eventBus = new GameEventBus(20);
         var stateStore = new GameStateStore();
@@ -503,16 +455,12 @@ public sealed class PlayerEventBridgeLogicTests
 
         Assert.True(published);
 
-        var gameEvent = Assert.Single(eventBus.GetRecentEvents(10));
-        Assert.Equal(EventTypes.PlayerBlockChanged, gameEvent.Type);
-        Assert.Null(GetNullableInt(gameEvent.Payload, "delta"));
-        Assert.Equal(0, GetInt(gameEvent.Payload, "block"));
-        Assert.Equal("cleared", GetString(gameEvent.Payload, "reason"));
+        Assert.Empty(eventBus.GetRecentEvents(10));
         Assert.Equal(0, stateStore.GetSnapshot().Player.Block);
     }
 
     [Fact]
-    public void PublishBlockCleared_should_emit_dedicated_event()
+    public void RefreshBlockCleared_should_update_snapshot_without_emitting_event()
     {
         var eventBus = new GameEventBus(20);
         var stateStore = new GameStateStore();
@@ -529,24 +477,16 @@ public sealed class PlayerEventBridgeLogicTests
             Block = 0
         };
 
-        var published = PlayerEventBridgeLogic.PublishBlockCleared(eventBus, stateStore, creature);
+        var refreshed = PlayerEventBridgeLogic.RefreshBlockCleared(stateStore, creature);
 
-        Assert.True(published);
+        Assert.True(refreshed);
 
-        var events = eventBus.GetRecentEvents(10);
-        Assert.Collection(
-            events,
-            item => Assert.Equal(EventTypes.PlayerBlockChanged, item.Type),
-            item =>
-            {
-                Assert.Equal(EventTypes.PlayerBlockCleared, item.Type);
-                Assert.Equal("defect", GetString(item.Payload, "playerId"));
-                Assert.Equal(0, GetInt(item.Payload, "block"));
-            });
+        Assert.Empty(eventBus.GetRecentEvents(10));
+        Assert.Equal(0, stateStore.GetSnapshot().Player.Block);
     }
 
     [Fact]
-    public void PublishBlockLossFromTransition_should_emit_negative_delta_when_block_decreases()
+    public void PublishBlockLossFromTransition_should_refresh_snapshot_without_emitting_event()
     {
         var eventBus = new GameEventBus(20);
         var stateStore = new GameStateStore();
@@ -567,11 +507,7 @@ public sealed class PlayerEventBridgeLogicTests
 
         Assert.True(published);
 
-        var gameEvent = Assert.Single(eventBus.GetRecentEvents(10));
-        Assert.Equal(EventTypes.PlayerBlockChanged, gameEvent.Type);
-        Assert.Equal(-5, GetInt(gameEvent.Payload, "delta"));
-        Assert.Equal(4, GetInt(gameEvent.Payload, "block"));
-        Assert.Equal("lost", GetString(gameEvent.Payload, "reason"));
+        Assert.Empty(eventBus.GetRecentEvents(10));
         Assert.Equal(4, stateStore.GetSnapshot().Player.Block);
     }
 
@@ -597,10 +533,8 @@ public sealed class PlayerEventBridgeLogicTests
 
         Assert.True(published);
 
-        var gameEvent = Assert.Single(eventBus.GetRecentEvents(10));
-        Assert.Equal(EventTypes.PlayerBlockChanged, gameEvent.Type);
-        Assert.Equal(-5, GetInt(gameEvent.Payload, "delta"));
-        Assert.Equal("damaged", GetString(gameEvent.Payload, "reason"));
+        Assert.Empty(eventBus.GetRecentEvents(10));
+        Assert.Equal(7, stateStore.GetSnapshot().Player.Block);
     }
 
     [Fact]
@@ -628,11 +562,8 @@ public sealed class PlayerEventBridgeLogicTests
 
         Assert.True(published);
 
-        var gameEvent = Assert.Single(eventBus.GetRecentEvents(10));
-        Assert.Equal(EventTypes.PlayerBlockChanged, gameEvent.Type);
-        Assert.Equal(-5, GetInt(gameEvent.Payload, "delta"));
-        Assert.Equal(7, GetInt(gameEvent.Payload, "block"));
-        Assert.Equal("damaged", GetString(gameEvent.Payload, "reason"));
+        Assert.Empty(eventBus.GetRecentEvents(10));
+        Assert.Equal(7, stateStore.GetSnapshot().Player.Block);
     }
 
     [Fact]

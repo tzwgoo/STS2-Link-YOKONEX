@@ -12,7 +12,7 @@ public sealed class EventSettingsPopup : PanelContainer
     private static readonly RuleEditorDefinition[] RuleDefinitions =
     [
         new("PlayerDamagedRule", "单次掉血规则", EventTypes.PlayerDamaged, "player_hurt"),
-        new("PlayerBlockLossRule", "单次掉甲规则", EventTypes.PlayerBlockChanged, "player_block_loss")
+        new("PlayerBlockLossRule", "单次破甲规则", EventTypes.PlayerBlockBroken, "player_block_loss")
     ];
 
     private readonly EventToggleService _eventToggles;

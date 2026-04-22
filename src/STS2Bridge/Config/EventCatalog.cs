@@ -6,17 +6,10 @@ public static class EventCatalog
 {
     public static IReadOnlyList<EventDefinition> Supported { get; } =
     [
-        new(EventTypes.RoomEntered, "进入房间", "Room Entered"),
-        new(EventTypes.CombatStarted, "战斗开始", "Combat Started"),
-        new(EventTypes.TurnStarted, "回合开始", "Turn Started"),
-        new(EventTypes.CombatEnded, "战斗结束", "Combat Ended"),
-        new(EventTypes.PlayerHpChanged, "玩家生命变化", "Player HP Changed"),
         new(EventTypes.PlayerDamaged, "玩家受伤", "Player Damaged"),
         new(EventTypes.PlayerHealed, "玩家回血", "Player Healed"),
         new(EventTypes.PlayerEnergyChanged, "玩家能量变化", "Player Energy Changed"),
-        new(EventTypes.PlayerBlockChanged, "玩家格挡变化", "Player Block Changed"),
         new(EventTypes.PlayerBlockBroken, "玩家破甲", "Player Block Broken"),
-        new(EventTypes.PlayerBlockCleared, "玩家格挡清空", "Player Block Cleared"),
         new(EventTypes.PlayerDied, "玩家死亡", "Player Died"),
         new(EventTypes.LightningOrbPassiveTriggered, "闪电球被动触发", "Lightning Orb Passive Triggered"),
         new(EventTypes.LightningOrbEvoked, "闪电球激发", "Lightning Orb Evoked"),

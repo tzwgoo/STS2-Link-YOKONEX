@@ -2,5 +2,5 @@ namespace STS2Bridge.Hooks;
 
 public static class RoomHooks
 {
-    public static IReadOnlyList<string> DescribeHooks() => ["room.entered"];
+    public static IReadOnlyList<string> DescribeHooks() => [];
 }

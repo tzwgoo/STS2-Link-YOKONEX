@@ -25,7 +25,6 @@ public static class EventLogDisplayLogic
         {
             EventTypes.PlayerDamaged => BuildPlayerDamagedSummary(gameEvent),
             EventTypes.PlayerHealed => BuildPlayerHealedSummary(gameEvent),
-            EventTypes.PlayerBlockChanged => BuildPlayerBlockChangedSummary(gameEvent),
             EventTypes.PlayerEnergyChanged => BuildPlayerEnergyChangedSummary(gameEvent),
             EventTypes.LightningOrbPassiveTriggered => BuildOrbSummary(gameEvent, "被动"),
             EventTypes.LightningOrbEvoked => BuildOrbSummary(gameEvent, "激发"),
@@ -35,9 +34,6 @@ public static class EventLogDisplayLogic
             EventTypes.DarkOrbEvoked => BuildOrbSummary(gameEvent, "激发"),
             EventTypes.PlasmaOrbPassiveTriggered => BuildOrbSummary(gameEvent, "被动"),
             EventTypes.PlasmaOrbEvoked => BuildOrbSummary(gameEvent, "激发"),
-            EventTypes.CombatStarted => "战斗开始",
-            EventTypes.CombatEnded => "战斗结束",
-            EventTypes.RoomEntered => "进入新房间",
             _ => BuildFallbackSummary(gameEvent.Payload)
         };
     }
@@ -65,26 +61,6 @@ public static class EventLogDisplayLogic
     {
         var amount = GetInt(gameEvent.Payload, "amount");
         return amount.HasValue ? $"回血 {amount.Value}" : BuildFallbackSummary(gameEvent.Payload);
-    }
-
-    private static string BuildPlayerBlockChangedSummary(GameEvent gameEvent)
-    {
-        var delta = GetInt(gameEvent.Payload, "delta");
-        var currentBlock = GetInt(gameEvent.Payload, "block");
-        var reason = GetString(gameEvent.Payload, "reason");
-
-        if (delta.HasValue && currentBlock.HasValue)
-        {
-            return $"格挡变化 {delta.Value:+#;-#;0}，当前格挡 {currentBlock.Value}" +
-                   (string.IsNullOrWhiteSpace(reason) ? string.Empty : $"，原因 {reason}");
-        }
-
-        if (delta.HasValue)
-        {
-            return $"格挡变化 {delta.Value:+#;-#;0}";
-        }
-
-        return BuildFallbackSummary(gameEvent.Payload);
     }
 
     private static string BuildPlayerEnergyChangedSummary(GameEvent gameEvent)

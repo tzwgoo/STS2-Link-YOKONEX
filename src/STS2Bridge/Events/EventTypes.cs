@@ -2,17 +2,10 @@ namespace STS2Bridge.Events;
 
 public static class EventTypes
 {
-    public const string RoomEntered = "room.entered";
-    public const string CombatStarted = "combat.started";
-    public const string CombatEnded = "combat.ended";
-    public const string TurnStarted = "turn.started";
-    public const string PlayerHpChanged = "player.hp_changed";
     public const string PlayerDamaged = "player.damaged";
     public const string PlayerHealed = "player.healed";
     public const string PlayerEnergyChanged = "player.energy_changed";
-    public const string PlayerBlockChanged = "player.block_changed";
     public const string PlayerBlockBroken = "player.block_broken";
-    public const string PlayerBlockCleared = "player.block_cleared";
     public const string PlayerDied = "player.died";
     public const string LightningOrbPassiveTriggered = "orb.lightning.passive_triggered";
     public const string LightningOrbEvoked = "orb.lightning.evoked";

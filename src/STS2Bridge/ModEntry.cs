@@ -19,7 +19,6 @@ namespace STS2Bridge;
 public static class ModEntry
 {
     private static RuntimeApiHost? _apiHost;
-    private static IDisposable? _combatManagerBridgeSubscription;
     private static IMCommandBridgeService? _imCommandBridgeService;
     private static IExternalImClient? _externalImClient;
     private static BridgeSettingsStore? _settingsStore;
@@ -66,18 +65,7 @@ public static class ModEntry
                 harmony.PatchAll();
             });
 
-            var combatManagerHookResult = HookGuard.Run("combat-manager-bridge", () =>
-            {
-                _combatManagerBridgeSubscription?.Dispose();
-                _combatManagerBridgeSubscription = CombatManagerEventBridge.CreateDefault(
-                    EventBus,
-                    runIdProvider: () => StateStore.GetSnapshot().RunId,
-                    floorProvider: () => StateStore.GetSnapshot().Floor,
-                    roomTypeProvider: () => StateStore.GetSnapshot().RoomType).Install();
-            });
-
             ModLog.Info($"Hook install result: success={harmonyResult.Success}, message={harmonyResult.Message}");
-            ModLog.Info($"CombatManager bridge result: success={combatManagerHookResult.Success}, message={combatManagerHookResult.Message}");
             ModLog.Info($"Detected game version: {GameVersionDetector.Detect()}");
 
             var settings = EventToggles.GetSettings();

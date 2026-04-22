@@ -27,17 +27,10 @@ X-STS2-Token: change-me
 
 当前支持的事件：
 
-- `room.entered`
-- `combat.started`
-- `turn.started`
-- `combat.ended`
-- `player.hp_changed`
 - `player.damaged`
 - `player.healed`
 - `player.energy_changed`
-- `player.block_changed`
 - `player.block_broken`
-- `player.block_cleared`
 - `player.died`
 - `item.purchased`
 - `card.upgraded`
@@ -62,15 +55,10 @@ ws://103.236.55.92:43001
 - `player.damaged -> player_hurt`
 - `player.healed -> player_heal`
 - `player.block_broken -> player_block_break`
-- `player.block_cleared -> player_block_clear`
 - `player.died -> player_dead`
-- `combat.started -> combat_start`
-- `combat.ended -> combat_end`
-- `turn.started -> turn_start`
 - `card.upgraded -> card_upgraded`
 - `item.purchased -> item_purchased`
 - `reward.selected -> reward_selected`
-- `room.entered -> room_entered`
 
 ## 3. 排查顺序
 

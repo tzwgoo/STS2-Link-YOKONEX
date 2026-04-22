@@ -2,17 +2,10 @@
 
 当前项目支持以下事件：
 
-- `room.entered`
-- `combat.started`
-- `combat.ended`
-- `turn.started`
-- `player.hp_changed`
 - `player.damaged`
 - `player.healed`
 - `player.energy_changed`
-- `player.block_changed`
 - `player.block_broken`
-- `player.block_cleared`
 - `player.died`
 - `orb.lightning.passive_triggered`
 - `orb.lightning.evoked`
@@ -33,12 +26,14 @@
 ```json
 {
   "eventId": "evt-1",
-  "type": "combat.started",
+  "type": "player.damaged",
   "timestamp": 1710000000,
   "runId": "run-1",
   "floor": 8,
   "roomType": "MonsterRoom",
-  "payload": {}
+  "payload": {
+    "amount": 2
+  }
 }
 ```
 

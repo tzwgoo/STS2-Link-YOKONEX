@@ -28,19 +28,7 @@ internal static class PlayerEventBridgeLogic
             return false;
         }
 
-        Publish(
-            eventBus,
-            stateStore,
-            EventTypes.PlayerHpChanged,
-            player,
-            new
-            {
-                playerId = player.PlayerId,
-                delta,
-                currentHp = player.CurrentHp,
-                maxHp = player.MaxHp,
-                block = player.Block
-            });
+        UpdateState(stateStore, player);
 
         if (delta < 0)
         {
@@ -88,59 +76,19 @@ internal static class PlayerEventBridgeLogic
             return false;
         }
 
-        Publish(
-            eventBus,
-            stateStore,
-            EventTypes.PlayerBlockChanged,
-            player,
-            new
-            {
-                playerId = player.PlayerId,
-                delta,
-                block = player.Block,
-                currentHp = player.CurrentHp,
-                maxHp = player.MaxHp,
-                reason
-            });
+        UpdateState(stateStore, player);
 
         return true;
     }
 
-    public static bool PublishBlockCleared(GameEventBus eventBus, GameStateStore stateStore, object? creature)
+    public static bool RefreshBlockCleared(GameStateStore stateStore, object? creature)
     {
         if (!TryCreatePlayerSnapshot(creature, out var player))
         {
             return false;
         }
 
-        Publish(
-            eventBus,
-            stateStore,
-            EventTypes.PlayerBlockChanged,
-            player,
-            new
-            {
-                playerId = player.PlayerId,
-                delta = (int?)null,
-                block = player.Block,
-                currentHp = player.CurrentHp,
-                maxHp = player.MaxHp,
-                reason = "cleared"
-            });
-
-        Publish(
-            eventBus,
-            stateStore,
-            EventTypes.PlayerBlockCleared,
-            player,
-            new
-            {
-                playerId = player.PlayerId,
-                block = player.Block,
-                currentHp = player.CurrentHp,
-                maxHp = player.MaxHp
-            },
-            updateState: false);
+        UpdateState(stateStore, player);
 
         return true;
     }
@@ -158,20 +106,7 @@ internal static class PlayerEventBridgeLogic
             return false;
         }
 
-        Publish(
-            eventBus,
-            stateStore,
-            EventTypes.PlayerBlockChanged,
-            player,
-            new
-            {
-                playerId = player.PlayerId,
-                delta,
-                block = player.Block,
-                currentHp = player.CurrentHp,
-                maxHp = player.MaxHp,
-                reason
-            });
+        UpdateState(stateStore, player);
 
         return true;
     }

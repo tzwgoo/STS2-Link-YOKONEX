@@ -62,11 +62,11 @@ public sealed class EventSettingsDisplayLogicTests
     }
 
     [Fact]
-    public void BuildRuleSummaryText_should_describe_block_loss_rule_in_chinese()
+    public void BuildRuleSummaryText_should_describe_block_broken_rule_in_chinese()
     {
-        var text = EventSettingsDisplayLogic.BuildRuleSummaryText("player.block_changed", threshold: 8, repeatCount: 2, enabled: true);
+        var text = EventSettingsDisplayLogic.BuildRuleSummaryText("player.block_broken", threshold: 8, repeatCount: 2, enabled: true);
 
-        Assert.Equal("玩家掉护甲8点，共触发2次", text);
+        Assert.Equal("玩家破甲8点，共触发2次", text);
     }
 
     [Fact]

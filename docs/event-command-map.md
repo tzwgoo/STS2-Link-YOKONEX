@@ -6,17 +6,10 @@
 
 | 中文事件 | Event Type | 默认 `commandId` | 说明 |
 | --- | --- | --- | --- |
-| 进入房间 | `room.entered` | `room_entered` | 进入新房间时触发 |
-| 战斗开始 | `combat.started` | `combat_start` | 进入战斗并完成初始化时触发 |
-| 回合开始 | `turn.started` | `turn_start` | 玩家新回合开始时触发 |
-| 战斗结束 | `combat.ended` | `combat_end` | 战斗结束时触发 |
-| 玩家生命变化 | `player.hp_changed` | `player_hp_changed` | 玩家生命值变化时触发 |
 | 玩家受伤 | `player.damaged` | `player_hurt` | 玩家受到伤害时触发 |
 | 玩家回血 | `player.healed` | `player_heal` | 玩家恢复生命时触发 |
 | 玩家能量变化 | `player.energy_changed` | `player_energy_changed` | 玩家能量变化时触发 |
-| 玩家格挡变化 | `player.block_changed` | `player_block_changed` | 玩家获得或失去格挡时触发 |
 | 玩家破甲 | `player.block_broken` | `player_block_break` | 玩家格挡被打破时触发 |
-| 玩家格挡清空 | `player.block_cleared` | `player_block_clear` | 玩家格挡被清空时触发 |
 | 玩家死亡 | `player.died` | `player_dead` | 玩家死亡时触发 |
 | 闪电球被动触发 | `orb.lightning.passive_triggered` | `orb_lightning_passive_triggered` | 闪电球执行被动效果时触发 |
 | 闪电球激发 | `orb.lightning.evoked` | `orb_lightning_evoked` | 闪电球被激发时触发 |
@@ -48,7 +41,7 @@
 
 - `player.damaged`
   - 单次掉血 `>= threshold` 时，发送 `repeatCount` 次
-- `player.block_changed`
+- `player.block_broken`
   - 仅对掉甲场景生效，单次掉甲 `>= threshold` 时，发送 `repeatCount` 次
 
 ## 相关文件

@@ -113,17 +113,17 @@ public sealed class IMCommandBridgeServiceTests
     {
         var bus = new GameEventBus();
         var settings = BridgeSettings.CreateDefault()
-            .SetCommandMapping(EventTypes.PlayerBlockChanged, string.Empty)
+            .SetCommandMapping(EventTypes.PlayerBlockBroken, string.Empty)
             .AddTriggerRule(new CommandTriggerRule(
                 Enabled: true,
-                EventType: EventTypes.PlayerBlockChanged,
+                EventType: EventTypes.PlayerBlockBroken,
                 Threshold: 8,
                 RepeatCount: 2,
                 CommandId: "player_block_loss"));
         var client = new FakeExternalImClient(loggedInUserId: "123456");
         using var bridge = new IMCommandBridgeService(bus, client, () => settings);
 
-        bus.Publish(new GameEvent("evt-1", EventTypes.PlayerBlockChanged, "run-1", 1, "MonsterRoom", new { delta = -9, reason = "lost" }));
+        bus.Publish(new GameEvent("evt-1", EventTypes.PlayerBlockBroken, "run-1", 1, "MonsterRoom", new { previousBlock = 9, block = 0 }));
         await client.WaitForDrainAsync();
 
         Assert.Equal(2, client.SentCommands.Count);
@@ -135,17 +135,17 @@ public sealed class IMCommandBridgeServiceTests
     {
         var bus = new GameEventBus();
         var settings = BridgeSettings.CreateDefault()
-            .SetCommandMapping(EventTypes.PlayerBlockChanged, string.Empty)
+            .SetCommandMapping(EventTypes.PlayerBlockBroken, string.Empty)
             .AddTriggerRule(new CommandTriggerRule(
                 Enabled: true,
-                EventType: EventTypes.PlayerBlockChanged,
+                EventType: EventTypes.PlayerBlockBroken,
                 Threshold: 8,
                 RepeatCount: 2,
                 CommandId: "player_block_loss"));
         var client = new FakeExternalImClient(loggedInUserId: "123456");
         using var bridge = new IMCommandBridgeService(bus, client, () => settings);
 
-        bus.Publish(new GameEvent("evt-1", EventTypes.PlayerBlockChanged, "run-1", 1, "MonsterRoom", new { delta = 9, reason = "gained" }));
+        bus.Publish(new GameEvent("evt-1", EventTypes.PlayerBlockBroken, "run-1", 1, "MonsterRoom", new { previousBlock = 7, block = 0 }));
         await client.WaitForDrainAsync();
 
         Assert.Empty(client.SentCommands);

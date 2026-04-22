@@ -76,8 +76,8 @@ internal static class PlayerHookPatches
                 return;
             }
 
-            var published = PlayerEventBridgeLogic.PublishBlockCleared(ModEntry.EventBus, ModEntry.StateStore, creature);
-            ModLog.Info($"AfterBlockCleared fired. creatureType={creature.GetType().FullName} published={published}");
+            var refreshed = PlayerEventBridgeLogic.RefreshBlockCleared(ModEntry.StateStore, creature);
+            ModLog.Info($"AfterBlockCleared fired. creatureType={creature.GetType().FullName} refreshed={refreshed}");
         }
     }
 

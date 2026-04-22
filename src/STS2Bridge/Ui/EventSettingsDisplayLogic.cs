@@ -29,7 +29,7 @@ public static class EventSettingsDisplayLogic
         return eventType switch
         {
             "player.damaged" => $"玩家掉血{threshold}滴，共触发{repeatCount}次",
-            "player.block_changed" => $"玩家掉护甲{threshold}点，共触发{repeatCount}次",
+            "player.block_broken" => $"玩家破甲{threshold}点，共触发{repeatCount}次",
             _ => $"单次变化达到{threshold}，共触发{repeatCount}次"
         };
     }
@@ -39,7 +39,7 @@ public static class EventSettingsDisplayLogic
         return eventType switch
         {
             "player.damaged" => "当单次掉血达到阈值时，向外部 IM 重复发送指令。",
-            "player.block_changed" => "只在掉护甲时生效，获得护甲不会触发。",
+            "player.block_broken" => "当格挡被打破且损失格挡达到阈值时触发。",
             _ => "满足阈值时重复发送对应指令。"
         };
     }
